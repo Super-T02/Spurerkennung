@@ -24,3 +24,6 @@
 ### Dokumenation
 - Hauptsächlich über PowerPoint
 - Sonstiges in Readme oder andere [[Markdown]] files
+
+### Sonstiges 
+[Vortrainierte KI](https://github.com/cfzd/Ultra-Fast-Lane-Detection-v2 "https://github.com/cfzd/Ultra-Fast-Lane-Detection-v2")
