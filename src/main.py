@@ -15,7 +15,7 @@ class Main():
 
         # Window size
         win_x = 1920
-        win_y = 1080
+        win_y = 1050
 
         # While the video is running
         while(video.isOpened()):
