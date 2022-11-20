@@ -33,16 +33,17 @@ class Calibration():
             ret, corners = cv.findChessboardCorners(gray_board, self.GRID_SIZE, None)
 
             # If found, add object points, image points (after refining them)
-            if self.debug and ret == True:
+            if ret == True:
                 self.objPoints.append(objp)
                 corners2 = cv.cornerSubPix(gray_board,corners, (11,11), (-1,-1), self.CRITERIA)
                 self.imgPoints.append(corners)
 
                 # Draw and display the corners
-                cv.drawChessboardCorners(board, self.GRID_SIZE, corners2, ret)
-                cv.imshow('img', board)
-                if cv.waitKey(500) & 0xFF == ord('q'):
-                    break
+                if self.debug: 
+                    cv.drawChessboardCorners(board, self.GRID_SIZE, corners2, ret)
+                    cv.imshow('img', board)
+                    if cv.waitKey(500) & 0xFF == ord('q'):
+                        break
 
         if self.debug: cv.destroyAllWindows()
 
