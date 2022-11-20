@@ -8,7 +8,7 @@ class Main():
     def __init__(self, path):
         print('Willkommen beim Projekt "Erkennung von Spurmarkierungen"')
 
-        # Lade das Bild
+        # Load video
         video = cv.VideoCapture(path)
         prev_frame_time = 0
         new_frame_time = 0
@@ -67,8 +67,11 @@ class Main():
         return edges
 
 if __name__ == '__main__':
+    # Path to video
     video = "img/Udacity/project_video.mp4"
     videoHarder = "img/Udacity/challenge_video.mp4"
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
+    
+    # Start the program
     Main(video)
     
