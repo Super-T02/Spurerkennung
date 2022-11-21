@@ -72,29 +72,27 @@ class Main():
         # Equalize the image
         img = self.calib.equalize(img)
         
-        # Segmentation of the image
-        img = self._segmentation(img)
-
         # Convert to grayscale
-        gray = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
-
-        # # Apply Gaussian blur
-        blur = cv.GaussianBlur(gray, (5, 5), 0)
+        img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
 
         # Apply Canny edge detection
         edges = cv.Canny(img, 100, 150)
+
+        # Segmentation of the image
+        edges = self._segmentation(edges)
+
 
         return edges
 
     def _segmentation(self, img):
         # Define a blank matrix that matches the image height/width.
         mask = np.zeros_like(img)
-        channel_count = img.shape[2]
-        match_mask_color = (255,) * channel_count
+
+        match_mask_color = 255
         
         # Fill inside the polygon
         vertices = self._getVerticesROI(img)
-        cv.fillPoly(mask, vertices, match_mask_color)
+        cv.fillPoly(mask, np.array([vertices], np.int32), match_mask_color)
         
         # Returning the image only where mask pixels match
         masked_image = cv.bitwise_and(img, mask)
@@ -102,10 +100,14 @@ class Main():
 
     def _getVerticesROI(self, img):
         # Generate the region of interest
-        height, width = img.shape[:2]
-        roi = np.array([
-            [(0, height), (width, height), (width/2, height/2)]
-        ], np.int32)
+        dim = img.shape
+        height = dim[0]
+        width = dim[1]
+        roi = [
+            (0, height - 75),
+            (width / 2, (height + 100) / 2),
+            (width, height - 75),
+        ]
 
         return roi
 
