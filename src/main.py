@@ -76,10 +76,10 @@ class Main():
         img = self._segmentation(img)
 
         # Convert to grayscale
-        # gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        gray = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
 
         # # Apply Gaussian blur
-        # blur = cv.GaussianBlur(gray, (5, 5), 0)
+        blur = cv.GaussianBlur(gray, (5, 5), 0)
 
         # Apply Canny edge detection
         edges = cv.Canny(img, 100, 150)
@@ -118,5 +118,10 @@ if __name__ == '__main__':
     
     # Start the program
     main = Main(video)
+    main1 = Main(videoHarder)
+    main2 = Main(videoHardest)
+
     main.startVideo()
+    main1.startVideo()
+    main2.startVideo()
     
