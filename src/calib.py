@@ -96,6 +96,6 @@ class Calibration():
         self.calibrated = True
 
 if __name__ == '__main__':
-    calib = Calibration(debug=False)
+    calib = Calibration(debug=True)
     plt.imshow(calib.equalize(cv.imread('img/Udacity/calib/calibration3.jpg', cv.COLOR_BGR2RGB)))
     plt.show()
