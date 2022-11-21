@@ -71,6 +71,9 @@ class Main():
     def _preprocess(self, img):
         # Equalize the image
         img = self.calib.equalize(img)
+        
+        # Segmentation of the image
+        img = self._segmentation(img)
 
         # Convert to grayscale
         # gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
@@ -82,6 +85,30 @@ class Main():
         edges = cv.Canny(img, 100, 150)
 
         return edges
+
+    def _segmentation(self, img):
+        # Define a blank matrix that matches the image height/width.
+        mask = np.zeros_like(img)
+        channel_count = img.shape[2]
+        match_mask_color = (255,) * channel_count
+        
+        # Fill inside the polygon
+        vertices = self._getVerticesROI(img)
+        cv.fillPoly(mask, vertices, match_mask_color)
+        
+        # Returning the image only where mask pixels match
+        masked_image = cv.bitwise_and(img, mask)
+        return masked_image
+
+    def _getVerticesROI(self, img):
+        # Generate the region of interest
+        height, width = img.shape[:2]
+        roi = np.array([
+            [(0, height), (width, height), (width/2, height/2)]
+        ], np.int32)
+
+        return roi
+
 
 if __name__ == '__main__':
     # Path to video
