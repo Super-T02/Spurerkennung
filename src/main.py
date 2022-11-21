@@ -4,18 +4,26 @@ import numpy as np
 import os
 import time
 
+import calib as cal
+
 class Main():
+    # Window size
+    WIN_X = 1280
+    WIN_Y = 720
+
     def __init__(self, path):
         print('Willkommen beim Projekt "Erkennung von Spurmarkierungen"')
+        self.calib = cal.Calibration(False)
+        self.path = path
+        
+    def startVideo(self):
+        if not os.path.exists(self.path):
+            return print('Video not found')
 
         # Load video
-        video = cv.VideoCapture(path)
+        video = cv.VideoCapture(self.path)
         prev_frame_time = 0
         new_frame_time = 0
-
-        # Window size
-        win_x = 1920
-        win_y = 1050
 
         # While the video is running
         while(video.isOpened()):
@@ -30,15 +38,12 @@ class Main():
 
             # Do operations on the frame
             gray = frame
-            gray = cv.resize(gray, (win_x, win_y))
+            gray = cv.resize(gray, (self.WIN_X, self.WIN_Y))
             font = cv.FONT_HERSHEY_SIMPLEX
             new_frame_time = time.time()
 
             # Calculate Frame Rate
-            fps = 1/(new_frame_time-prev_frame_time)
-            prev_frame_time = new_frame_time
-            fps = int(fps)
-            fps = str(fps)
+            fps, prev_frame_time = self._calcFPS(prev_frame_time, new_frame_time)
 
             # Put fps on the screen
             cv.putText(gray, fps, (7, 21), font, 1, (100, 100, 100), 2, cv.LINE_AA)
@@ -54,7 +59,19 @@ class Main():
         video.release()
         cv.destroyAllWindows()
 
+    def _calcFPS(self, prev_frame_time, new_frame_time):
+        # Calculate Frame Rate
+        fps = 1/(new_frame_time-prev_frame_time)
+        prev_frame_time = new_frame_time
+        fps = int(fps)
+        fps = str(fps)
+
+        return fps, prev_frame_time
+
     def _preprocess(self, img):
+        # Equalize the image
+        img = self.calib.equalize(img)
+
         # Convert to grayscale
         # gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
@@ -73,5 +90,6 @@ if __name__ == '__main__':
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
     
     # Start the program
-    Main(video)
+    main = Main(video)
+    main.startVideo()
     

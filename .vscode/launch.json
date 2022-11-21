@@ -19,6 +19,14 @@
             "program": "src/main.py",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Python: Calib",
+            "type": "python",
+            "request": "launch",
+            "program": "src/calib.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }
