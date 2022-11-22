@@ -11,10 +11,29 @@ class Main():
     WIN_X = 1280
     WIN_Y = 720
 
-    def __init__(self, path):
+    # Gauss settings
+    GAUSS_KERNEL = (5, 5)
+
+    # Canny settings
+    CANNY_LOWER = 100
+    CANNY_UPPER = 150
+
+    # Hough Settings
+    HOUG_RHO = 2
+    HOUG_THETA = 180
+    HOUGH_THRESHOLD = 120
+    HOUGH_MIN_LINE_LENGTH = 40
+    HOUGH_MAX_LINE_GAP = 5
+
+
+    def __init__(self, path, roi, canny_lower = None, canny_upper = None):
         print('Willkommen beim Projekt "Erkennung von Spurmarkierungen"')
+        if path is None or roi is None: return print('No path or roi given')
         self.calib = cal.Calibration(False)
         self.path = path
+        self.roi = roi
+        self.canny_lower = canny_lower if canny_lower is not None else self.CANNY_LOWER
+        self.canny_upper = canny_upper if canny_upper is not None else self.CANNY_UPPER
         
     def startVideo(self, hugs=False):
         if not os.path.exists(self.path):
@@ -77,8 +96,11 @@ class Main():
         # Convert to grayscale
         img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
 
+        # Decrease noise via gauss
+        img = self._gauss(img)
+
         # Apply Canny edge detection
-        img = cv.Canny(img, 100, 150)
+        img = self._canny(img)
 
         # Segmentation of the image
         img = self._segmentation(img)
@@ -90,6 +112,12 @@ class Main():
 
 
         return img
+
+    def _gauss(self, img):
+        return cv.GaussianBlur(img, self.GAUSS_KERNEL, 0)
+
+    def _canny(self, img):
+        return cv.Canny(img, self.canny_lower, self.canny_upper)
 
     def _segmentation(self, img):
         # Define a blank matrix that matches the image height/width.
@@ -111,9 +139,9 @@ class Main():
         height = dim[0]
         width = dim[1]
         roi = [
-            (0, height - 75),
-            (width / 2, (height + 100) / 2),
-            (width, height - 75),
+            (self.roi[0][0], height + self.roi[0][1]),
+            ((width + self.roi[1][0]) / 2, (height + self.roi[1][1]) / 2),
+            (width + self.roi[2][0], height + self.roi[2][1]),
         ]
 
         return roi
@@ -140,12 +168,12 @@ class Main():
     def _getHoughLines(self, img):
         lines = cv.HoughLinesP(
             img,
-            rho=6,
-            theta=np.pi / 60,
-            threshold=160,
+            rho=self.HOUG_RHO,
+            theta=np.pi / self.HOUG_THETA,
+            threshold=self.HOUGH_THRESHOLD,
             lines=np.array([]),
-            minLineLength=40,
-            maxLineGap=20
+            minLineLength=self.HOUGH_MIN_LINE_LENGTH,
+            maxLineGap=self.HOUGH_MAX_LINE_GAP
         )
         return lines
 
@@ -153,13 +181,28 @@ class Main():
 if __name__ == '__main__':
     # Path to video
     video = "img/Udacity/project_video.mp4"
+    roi_video = [
+            (80, - 75),
+            (50, 120),
+            (-120, - 75),
+    ]
     videoHarder = "img/Udacity/challenge_video.mp4"
+    roi_videoHarder = [
+            (180, - 75),
+            (80, 160),
+            (-180, - 75),
+    ]
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
+    roi_videoHardest = [
+            (80, - 75),
+            (50, 120),
+            (-120, - 75),
+    ]
     
     # Start the program
-    main = Main(video)
-    main1 = Main(videoHarder)
-    main2 = Main(videoHardest)
+    main = Main(video, roi_video)
+    main1 = Main(videoHarder, roi_videoHarder)
+    main2 = Main(videoHardest, roi_videoHardest)
 
     main.startVideo()
     main.startVideo(True)
