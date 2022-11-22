@@ -147,10 +147,10 @@ class Main():
         return roi
 
     def _drawLines(self, img, lines, color=[0,0,255], thickness=10):
-        # If there are no lines to draw, exit.
-        if lines is None:
-            return    # Make a copy of the original image.
-        img = np.copy(img)    # Create a blank image that matches the original in size.
+        # Make a copy of the original image.
+        img = np.copy(img)
+        
+        # Create a blank image that matches the original in size.
         line_img = np.zeros(
             (
                 img.shape[0],
@@ -158,11 +158,20 @@ class Main():
                 3
             ),
             dtype=np.uint8,
-        )    # Loop over all lines and draw them on the blank image.
-        for line in lines:
-            for x1, y1, x2, y2 in line:
-                cv.line(line_img, (x1, y1), (x2, y2), color, thickness)    # Merge the image with the lines onto the original.
-        img = cv.addWeighted(img, 0.8, line_img, 1.0, 0.0)    # Return the modified image.
+        )
+
+        # Check if any lines were detected
+        if lines is not None:
+
+            # Loop over all lines and draw them on the blank image.
+            for line in lines:
+                for x1, y1, x2, y2 in line:
+                    cv.line(line_img, (x1, y1), (x2, y2), color, thickness)
+        
+        # Add the lines to the original image
+        img = cv.addWeighted(img, 0.8, line_img, 1.0, 0.0)
+        
+        # Return the modified image.
         return img
 
     def _getHoughLines(self, img):
