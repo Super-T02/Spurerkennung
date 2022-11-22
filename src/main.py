@@ -5,6 +5,7 @@ import os
 import time
 
 import calib as cal
+import perspective_transform as per
 
 class Main():
     # Window size
@@ -30,12 +31,13 @@ class Main():
         print('Willkommen beim Projekt "Erkennung von Spurmarkierungen"')
         if path is None or roi is None: return print('No path or roi given')
         self.calib = cal.Calibration(False)
+        self.transformation = per.Transformation(False)
         self.path = path
         self.roi = roi
         self.canny_lower = canny_lower if canny_lower is not None else self.CANNY_LOWER
         self.canny_upper = canny_upper if canny_upper is not None else self.CANNY_UPPER
         
-    def startVideo(self, hugs=False):
+    def startVideo(self, hough=False, show_areal=False):
         if not os.path.exists(self.path):
             return print('Video not found')
 
@@ -51,14 +53,15 @@ class Main():
             # Break if video is finish or no input
             if not ret:
                 break
-            
+
             # Do here the image processing
-            frame = self._preprocess(frame, hugs=hugs)
+            frame = self._preprocess_default(frame, hough=hough) if not show_areal else self._preprocess_areal_view(frame)
 
             # Do operations on the frame
-            gray = frame
-            if gray is not None:
-                gray = cv.resize(gray, (self.WIN_X, self.WIN_Y))
+            if frame is not None:
+                frame = cv.resize(frame, (self.WIN_X, self.WIN_Y))
+                
+                #transformed = self.transformation.transform_image_perspective(frame)
                 font = cv.FONT_HERSHEY_SIMPLEX
                 new_frame_time = time.time()
 
@@ -66,9 +69,9 @@ class Main():
                 fps, prev_frame_time = self._calcFPS(prev_frame_time, new_frame_time)
 
                 # Put fps on the screen
-                cv.putText(gray, fps, (7, 21), font, 1, (100, 100, 100), 2, cv.LINE_AA)
+                cv.putText(frame, fps, (7, 21), font, 1, (100, 100, 100), 2, cv.LINE_AA)
 
-                cv.imshow('Video', gray)
+                cv.imshow('Video', frame)
 
             # press 'Q' for exit
             if cv.waitKey(1) & 0xFF == ord('q'):
@@ -79,6 +82,12 @@ class Main():
         video.release()
         cv.destroyAllWindows()
 
+    def _preprocess_areal_view(self, img):
+        img = self.transformation.transform_image_perspective(img)
+        img = self._gauss(img)
+        img = self._canny(img)
+        return img
+
     def _calcFPS(self, prev_frame_time, new_frame_time):
         # Calculate Frame Rate
         fps = 1/(new_frame_time-prev_frame_time)
@@ -88,7 +97,7 @@ class Main():
 
         return fps, prev_frame_time
 
-    def _preprocess(self, img, hugs=False):
+    def _preprocess_default(self, img, hough=False):
         # Equalize the image
         img = self.calib.equalize(img)
         self.equilized_img = img
@@ -106,7 +115,7 @@ class Main():
         img = self._segmentation(img)
 
         # Get the hough lines
-        if hugs:
+        if hough:
             lines = self._getHoughLines(img)
             img = self._drawLines(self.equilized_img, lines)
 
@@ -209,14 +218,14 @@ if __name__ == '__main__':
     ]
     
     # Start the program
-    main = Main(video, roi_video)
-    main1 = Main(videoHarder, roi_videoHarder)
+    main = Main(video, roi_video) # canny_lower=50, canny_upper=100 if you change the order of areal view preprocessing 
+    main1 = Main(videoHarder, roi_videoHarder, canny_lower=15, canny_upper=30)
     main2 = Main(videoHardest, roi_videoHardest)
 
-    main.startVideo()
-    main.startVideo(True)
+    # main.startVideo()
+    # main.startVideo(hough=True, show_areal=True)
     main1.startVideo()
-    main1.startVideo(True)
-    main2.startVideo()
-    main2.startVideo(True)
+    main1.startVideo(hough=True, show_areal=True)
+    # main2.startVideo()
+    # main2.startVideo(hough=True)
     
