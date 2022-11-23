@@ -55,12 +55,15 @@ class Main():
                 break
 
             # Do here the image processing
+            frame = cv.resize(frame, (self.WIN_X, self.WIN_Y))
+            
+            # Equalize the image
+            frame = self.calib.equalize(frame)
+            self.equilized_img = frame
             frame = self._preprocess_default(frame, hough=hough) if not show_areal else self._preprocess_areal_view(frame)
 
             # Do operations on the frame
             if frame is not None:
-                frame = cv.resize(frame, (self.WIN_X, self.WIN_Y))
-                
                 #transformed = self.transformation.transform_image_perspective(frame)
                 font = cv.FONT_HERSHEY_SIMPLEX
                 new_frame_time = time.time()
@@ -98,10 +101,6 @@ class Main():
         return fps, prev_frame_time
 
     def _preprocess_default(self, img, hough=False):
-        # Equalize the image
-        img = self.calib.equalize(img)
-        self.equilized_img = img
-
         # Convert to grayscale
         img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
 

@@ -3,6 +3,7 @@ import cv2 as cv
 from matplotlib import pyplot as plt
 import numpy as np
 
+from calib import Calibration as cal
 
 class Transformation():
 
@@ -11,10 +12,10 @@ class Transformation():
 
     def _get_transformation_coordinates(self, height, width):
         #first x coordinate, then y (yes confusing)
-        src_top_left = [510, 460]
-        src_top_right = [width-500, 460]
-        src_bot_left = [10, height-40]
-        src_bot_right = [width-10,height-40]
+        src_top_left = [435, 460]
+        src_top_right = [width-405, 460]
+        src_bot_left = [200, height-50]
+        src_bot_right = [width-160,height-50]
         src = [src_top_left, src_top_right, src_bot_left, src_bot_right]
 
         dst_top_left = [0,0]
@@ -63,6 +64,8 @@ class Transformation():
     def debug_mode(self):
         if not self.debug:
             return print('Debug mode deactivated, passing...')
+
+        calib = cal(debug=False)
         # Path to video
         video = "img/Udacity/project_video.mp4"
         videoHarder = "img/Udacity/challenge_video.mp4"
@@ -85,13 +88,12 @@ class Transformation():
                 break
             
             # Do here the image processing
-            # frame = cv.Canny(frame, 100, 150)
+            frame = cv.resize(frame, (win_x, win_y))
+            frame = calib.equalize(frame)
 
             # Do operations on the frame
-            gray = frame
-            gray = cv.resize(gray, (win_x, win_y))
-            transformed = self.transform_image_perspective(gray)
-            gray = self._set_points_in_picture(gray)
+            transformed = self.transform_image_perspective(frame)
+            frame = self._set_points_in_picture(frame)
             font = cv.FONT_HERSHEY_SIMPLEX
             new_frame_time = time.time()
 
@@ -102,10 +104,10 @@ class Transformation():
             fps = str(fps)
 
             # Put fps on the screen
-            cv.putText(gray, fps, (7, 21), font, 1, (100, 100, 100), 2, cv.LINE_AA)
+            cv.putText(frame, fps, (7, 21), font, 1, (100, 100, 100), 2, cv.LINE_AA)
             cv.putText(transformed, fps, (7, 21), font, 1, (100, 100, 100), 2, cv.LINE_AA)
 
-            cv.imshow('Video', gray)
+            cv.imshow('Video', frame)
             cv.imshow('transformed', transformed)
 
             # press 'Q' for exit
@@ -117,6 +119,6 @@ class Transformation():
 
 
 if __name__ == '__main__':
-    calib = Transformation(debug=True)
-    calib.debug_mode()
+    transform = Transformation(debug=True)
+    transform.debug_mode()
     
