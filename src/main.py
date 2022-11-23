@@ -222,10 +222,11 @@ if __name__ == '__main__':
     main1 = Main(videoHarder, roi_videoHarder, canny_lower=15, canny_upper=30)
     main2 = Main(videoHardest, roi_videoHardest)
 
-    # main.startVideo()
-    # main.startVideo(hough=True, show_areal=True)
-    main1.startVideo()
-    main1.startVideo(hough=True, show_areal=True)
+    main.startVideo()
+    main.startVideo(hough=True, show_areal=True)
+    main.startVideo(hough=True)
+    # main1.startVideo()
+    # main1.startVideo(hough=True, show_areal=True)
     # main2.startVideo()
     # main2.startVideo(hough=True)
     
