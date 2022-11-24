@@ -12,16 +12,16 @@ class Transformation():
 
     def _get_transformation_coordinates(self, height, width):
         #first x coordinate, then y (yes confusing)
-        src_top_left = [525, 400]
-        src_top_right = [width-510, 400]
-        src_bot_left = [30, height-50]
-        src_bot_right = [width-5,height-50]
+        src_top_left = [568, 405]
+        src_top_right = [673, 405]
+        src_bot_left = [320, 579]
+        src_bot_right = [964, 579]
         src = [src_top_left, src_top_right, src_bot_left, src_bot_right]
 
-        dst_top_left = [0,0]
-        dst_top_right = [width,0]
-        dst_bot_left = [0,height]
-        dst_bot_right = [width,height]
+        dst_top_left = [300,0]
+        dst_top_right = [980,0]
+        dst_bot_left = [350,720]
+        dst_bot_right = [980,720]
         dst = [dst_top_left, dst_top_right, dst_bot_left, dst_bot_right]
 
         return src, dst
@@ -72,7 +72,7 @@ class Transformation():
         videoHardest = "img/Udacity/harder_challenge_video.mp4"
 
         # Load video
-        video = cv.VideoCapture(video)
+        video = cv.VideoCapture(videoHarder)
         prev_frame_time = 0
         new_frame_time = 0
 
@@ -110,9 +110,11 @@ class Transformation():
             cv.imshow('Video', frame)
             cv.imshow('transformed', transformed)
 
-            # press 'Q' for exit
-            if cv.waitKey(1) & 0xFF == ord('q'):
-                break
+            if cv.waitKey(-1) & 0xFF == ord('n'):
+                next
+            else:
+                break           
+
         # Stop video and close window
         video.release()
         cv.destroyAllWindows()
