@@ -86,7 +86,7 @@ class Main():
         cv.destroyAllWindows()
 
     def _preprocess_areal_view(self, img):
-        img = self.transformation.transform_image_perspective(img)
+        img, _ = self.transformation.transform_image_perspective(img)
         img = self._gauss(img)
         img = self._canny(img)
         return img

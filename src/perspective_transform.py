@@ -45,7 +45,7 @@ class Transformation():
 
         img_transformed = cv.warpPerspective(img,M,(img.shape[1], img.shape[0]),flags=cv.INTER_LINEAR) #TODO: possibly change this flag in future versions, maybe: INTER_NEAREST
 
-        return img_transformed
+        return img_transformed, M_reversed
 
 
     def _set_points_in_picture(self, img):
@@ -92,7 +92,7 @@ class Transformation():
             frame = calib.equalize(frame)
 
             # Do operations on the frame
-            transformed = self.transform_image_perspective(frame)
+            transformed, _ = self.transform_image_perspective(frame)
             frame = self._set_points_in_picture(frame)
             font = cv.FONT_HERSHEY_SIMPLEX
             new_frame_time = time.time()
