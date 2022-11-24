@@ -6,6 +6,7 @@ import time
 
 import calib as cal
 import perspective_transform as per
+import sliding_window as slw
 
 class Main():
     # Window size
@@ -27,17 +28,20 @@ class Main():
     HOUGH_MAX_LINE_GAP = 5
 
 
-    def __init__(self, path, roi, canny_lower = None, canny_upper = None):
+    def __init__(self, path, roi, canny_lower = None, canny_upper = None, thresh = None):
         print('Willkommen beim Projekt "Erkennung von Spurmarkierungen"')
         if path is None or roi is None: return print('No path or roi given')
         self.calib = cal.Calibration(False)
         self.transformation = per.Transformation(False)
+        self.sliding_win = slw.SlidingWindow(thresh)
+        
         self.path = path
         self.roi = roi
+
         self.canny_lower = canny_lower if canny_lower is not None else self.CANNY_LOWER
         self.canny_upper = canny_upper if canny_upper is not None else self.CANNY_UPPER
         
-    def startVideo(self, hough=False, show_areal=False):
+    def startVideo(self, mode=0, hough=False, show_areal=False):
         if not os.path.exists(self.path):
             return print('Video not found')
 
@@ -60,7 +64,10 @@ class Main():
             # Equalize the image
             frame = self.calib.equalize(frame)
             self.equilized_img = frame
-            frame = self._preprocess_default(frame, hough=hough) if not show_areal else self._preprocess_areal_view(frame)
+            if mode == 1:
+                frame = self.sliding_win.apply_sliding_window(frame)
+            else:
+                frame = self._preprocess_default(frame, hough=hough) if not show_areal else self._preprocess_areal_view(frame)
 
             # Do operations on the frame
             if frame is not None:
@@ -217,11 +224,16 @@ if __name__ == '__main__':
     ]
     
     # Start the program
-    main = Main(video, roi_video) # canny_lower=50, canny_upper=100 if you change the order of areal view preprocessing 
+    main = Main(video, roi_video, 1) # canny_lower=50, canny_upper=100 if you change the order of areal view preprocessing 
     main1 = Main(videoHarder, roi_videoHarder, canny_lower=15, canny_upper=30)
     main2 = Main(videoHardest, roi_videoHardest)
 
+    # Mode:
+    # - 0: Hough
+    # - 1: Sliding window
+
     main.startVideo()
+    main.startVideo(mode=1)
     main.startVideo(hough=True, show_areal=True)
     main.startVideo(hough=True)
     # main1.startVideo()

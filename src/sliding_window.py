@@ -15,12 +15,12 @@ class SlidingWindow():
     MIN_PIX = 20
     THRESH = (150, 255)
 
-    def __init__(self, thresh = THRESH, debug = False, debug_plots = False) -> None:
+    def __init__(self, thresh = None, debug = False, debug_plots = False) -> None:
         self.per_tran = per.Transformation()
         self.debug = debug
         self.debug_plots = debug_plots
         self.last_draw_info = None
-        self.thresh = thresh
+        self.thresh = thresh if thresh else self.THRESH
 
 
     def _preprocess(self, img):
