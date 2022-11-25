@@ -6,6 +6,7 @@ import time
 
 import calib as cal
 import perspective_transform as per
+import sliding_window as slw
 
 class Main():
     # Window size
@@ -27,17 +28,20 @@ class Main():
     HOUGH_MAX_LINE_GAP = 5
 
 
-    def __init__(self, path, roi, canny_lower = None, canny_upper = None):
+    def __init__(self, path, roi, canny_lower = None, canny_upper = None, thresh = None):
         print('Willkommen beim Projekt "Erkennung von Spurmarkierungen"')
         if path is None or roi is None: return print('No path or roi given')
         self.calib = cal.Calibration(False)
         self.transformation = per.Transformation(False)
+        self.sliding_win = slw.SlidingWindow(thresh)
+        
         self.path = path
         self.roi = roi
+
         self.canny_lower = canny_lower if canny_lower is not None else self.CANNY_LOWER
         self.canny_upper = canny_upper if canny_upper is not None else self.CANNY_UPPER
         
-    def startVideo(self, hough=False, show_areal=False):
+    def startVideo(self, mode=0, hough=False, show_areal=False):
         if not os.path.exists(self.path):
             return print('Video not found')
 
@@ -55,12 +59,18 @@ class Main():
                 break
 
             # Do here the image processing
-            frame = self._preprocess_default(frame, hough=hough) if not show_areal else self._preprocess_areal_view(frame)
+            frame = cv.resize(frame, (self.WIN_X, self.WIN_Y))
+            
+            # Equalize the image
+            frame = self.calib.equalize(frame)
+            self.equilized_img = frame
+            if mode == 1:
+                frame = self.sliding_win.apply_sliding_window(frame)
+            else:
+                frame = self._preprocess_default(frame, hough=hough) if not show_areal else self._preprocess_areal_view(frame)
 
             # Do operations on the frame
             if frame is not None:
-                frame = cv.resize(frame, (self.WIN_X, self.WIN_Y))
-                
                 #transformed = self.transformation.transform_image_perspective(frame)
                 font = cv.FONT_HERSHEY_SIMPLEX
                 new_frame_time = time.time()
@@ -83,7 +93,7 @@ class Main():
         cv.destroyAllWindows()
 
     def _preprocess_areal_view(self, img):
-        img = self.transformation.transform_image_perspective(img)
+        img, _ = self.transformation.transform_image_perspective(img)
         img = self._gauss(img)
         img = self._canny(img)
         return img
@@ -98,10 +108,6 @@ class Main():
         return fps, prev_frame_time
 
     def _preprocess_default(self, img, hough=False):
-        # Equalize the image
-        img = self.calib.equalize(img)
-        self.equilized_img = img
-
         # Convert to grayscale
         img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
 
@@ -218,14 +224,20 @@ if __name__ == '__main__':
     ]
     
     # Start the program
-    main = Main(video, roi_video) # canny_lower=50, canny_upper=100 if you change the order of areal view preprocessing 
+    main = Main(video, roi_video, 1) # canny_lower=50, canny_upper=100 if you change the order of areal view preprocessing 
     main1 = Main(videoHarder, roi_videoHarder, canny_lower=15, canny_upper=30)
     main2 = Main(videoHardest, roi_videoHardest)
 
-    # main.startVideo()
-    # main.startVideo(hough=True, show_areal=True)
-    main1.startVideo()
-    main1.startVideo(hough=True, show_areal=True)
+    # Mode:
+    # - 0: Hough
+    # - 1: Sliding window
+
+    main.startVideo()
+    main.startVideo(mode=1)
+    main.startVideo(hough=True, show_areal=True)
+    main.startVideo(hough=True)
+    # main1.startVideo()
+    # main1.startVideo(hough=True, show_areal=True)
     # main2.startVideo()
     # main2.startVideo(hough=True)
     

@@ -3,6 +3,7 @@ import cv2 as cv
 from matplotlib import pyplot as plt
 import numpy as np
 
+from calib import Calibration as cal
 
 class Transformation():
 
@@ -11,16 +12,16 @@ class Transformation():
 
     def _get_transformation_coordinates(self, height, width):
         #first x coordinate, then y (yes confusing)
-        src_top_left = [510, 460]
-        src_top_right = [width-500, 460]
-        src_bot_left = [10, height-40]
-        src_bot_right = [width-10,height-40]
+        src_top_left = [568, 405]
+        src_top_right = [673, 405]
+        src_bot_left = [320, 579]
+        src_bot_right = [964, 579]
         src = [src_top_left, src_top_right, src_bot_left, src_bot_right]
 
-        dst_top_left = [0,0]
-        dst_top_right = [width,0]
-        dst_bot_left = [0,height]
-        dst_bot_right = [width,height]
+        dst_top_left = [300,0]
+        dst_top_right = [980,0]
+        dst_bot_left = [350,720]
+        dst_bot_right = [980,720]
         dst = [dst_top_left, dst_top_right, dst_bot_left, dst_bot_right]
 
         return src, dst
@@ -44,7 +45,7 @@ class Transformation():
 
         img_transformed = cv.warpPerspective(img,M,(img.shape[1], img.shape[0]),flags=cv.INTER_LINEAR) #TODO: possibly change this flag in future versions, maybe: INTER_NEAREST
 
-        return img_transformed
+        return img_transformed, M_reversed
 
 
     def _set_points_in_picture(self, img):
@@ -63,13 +64,15 @@ class Transformation():
     def debug_mode(self):
         if not self.debug:
             return print('Debug mode deactivated, passing...')
+
+        calib = cal(debug=False)
         # Path to video
         video = "img/Udacity/project_video.mp4"
         videoHarder = "img/Udacity/challenge_video.mp4"
         videoHardest = "img/Udacity/harder_challenge_video.mp4"
 
         # Load video
-        video = cv.VideoCapture(video)
+        video = cv.VideoCapture(videoHarder)
         prev_frame_time = 0
         new_frame_time = 0
 
@@ -85,13 +88,12 @@ class Transformation():
                 break
             
             # Do here the image processing
-            # frame = cv.Canny(frame, 100, 150)
+            frame = cv.resize(frame, (win_x, win_y))
+            frame = calib.equalize(frame)
 
             # Do operations on the frame
-            gray = frame
-            gray = cv.resize(gray, (win_x, win_y))
-            transformed = self.transform_image_perspective(gray)
-            gray = self._set_points_in_picture(gray)
+            transformed, _ = self.transform_image_perspective(frame)
+            frame = self._set_points_in_picture(frame)
             font = cv.FONT_HERSHEY_SIMPLEX
             new_frame_time = time.time()
 
@@ -102,21 +104,23 @@ class Transformation():
             fps = str(fps)
 
             # Put fps on the screen
-            cv.putText(gray, fps, (7, 21), font, 1, (100, 100, 100), 2, cv.LINE_AA)
+            cv.putText(frame, fps, (7, 21), font, 1, (100, 100, 100), 2, cv.LINE_AA)
             cv.putText(transformed, fps, (7, 21), font, 1, (100, 100, 100), 2, cv.LINE_AA)
 
-            cv.imshow('Video', gray)
+            cv.imshow('Video', frame)
             cv.imshow('transformed', transformed)
 
-            # press 'Q' for exit
-            if cv.waitKey(1) & 0xFF == ord('q'):
-                break
+            if cv.waitKey(-1) & 0xFF == ord('n'):
+                next
+            else:
+                break           
+
         # Stop video and close window
         video.release()
         cv.destroyAllWindows()
 
 
 if __name__ == '__main__':
-    calib = Transformation(debug=True)
-    calib.debug_mode()
+    transform = Transformation(debug=True)
+    transform.debug_mode()
     
