@@ -20,8 +20,8 @@ class Transformation():
 
         dst_top_left = [300,0]
         dst_top_right = [980,0]
-        dst_bot_left = [350,720]
-        dst_bot_right = [980,720]
+        dst_bot_left = [350,620]
+        dst_bot_right = [980,620]
         dst = [dst_top_left, dst_top_right, dst_bot_left, dst_bot_right]
 
         return src, dst
