@@ -12,10 +12,11 @@ class Transformation():
 
     def _get_transformation_coordinates(self, height, width):
         #first x coordinate, then y (yes confusing)
-        src_top_left = [568, 405]
-        src_top_right = [673, 405]
+        src_top_left = [595, 384]
+        src_top_right = [635, 384]
         src_bot_left = [320, 579]
         src_bot_right = [964, 579]
+
         src = [src_top_left, src_top_right, src_bot_left, src_bot_right]
 
         dst_top_left = [300,0]
