@@ -14,12 +14,15 @@ class SlidingWindow():
     MARGIN = 100
     MIN_PIX = 20
     THRESH = (150, 255)
+    LANE_WIDTH_FOR_SEARCH = 20
 
     def __init__(self, thresh = None, debug = False, debug_plots = False) -> None:
-        self.per_tran = per.Transformation()
+        self.per_tran = per.Transformation(True)
         self.debug = debug
         self.debug_plots = debug_plots
         self.last_draw_info = None
+        self.last_frame_right_x = None
+        self.last_frame_left_x = None
         self.thresh = thresh if thresh else self.THRESH
 
 
@@ -48,7 +51,8 @@ class SlidingWindow():
     def apply_sliding_window(self, img):
         # Preprocess the image
         img_transformed, M_reverse = self._preprocess(img)
-
+        if self.debug:
+            cv.imshow('transformed', img_transformed)            
         # Set local vars
         hist = self.get_histogram(img_transformed)
         img_y_shape = img_transformed.shape[0]
@@ -72,8 +76,8 @@ class SlidingWindow():
         else:
             self.last_draw_info = draw_info
 
-            # Draw the line
-            img = self._draw_lane_area(img, img_transformed, M_reverse, draw_info)
+        # Draw the line
+        img = self._draw_lane_area(img, img_transformed, M_reverse, draw_info)
 
         # Return finished frame
         return img
@@ -85,9 +89,29 @@ class SlidingWindow():
         if self.debug: self.debug_img = np.dstack((img, img, img)) * 255
         mid = img.shape[1]//2
 
-        # Divide the histogram into to parts
-        leftx_base = np.argmax(hist[:mid])
-        rightx_base = np.argmax(hist[mid:]) + mid
+        if not self.last_frame_left_x:
+            # Divide the histogram into to parts
+            leftx_base = np.argmax(hist[:mid])
+        else:
+            left_negative = self.last_frame_left_x - self.LANE_WIDTH_FOR_SEARCH
+            left_positive = self.last_frame_left_x + self.LANE_WIDTH_FOR_SEARCH
+            if left_negative < 1:
+                left_negative = 1
+                left_positive = mid
+            leftx_base = np.argmax(hist[left_negative : left_positive]) + left_negative
+            self.last_frame_left_x = None
+            
+        if not self.last_frame_right_x:
+            # Divide the histogram into to parts
+            rightx_base = np.argmax(hist[mid:]) + mid
+        else:
+            right_negative = self.last_frame_right_x - self.LANE_WIDTH_FOR_SEARCH
+            right_positive = self.last_frame_right_x + self.LANE_WIDTH_FOR_SEARCH
+            if right_positive > img.shape[1] - 1:
+                right_negative = mid
+                right_positive = img.shape[1] - 1 
+            rightx_base = np.argmax(hist[right_negative : right_positive]) + right_negative
+            self.last_frame_right_x = None
 
 
         # Number of sliding windows in the frame
@@ -119,8 +143,12 @@ class SlidingWindow():
 
         # Define rectangle
         if self.debug:
-            cv.rectangle(self.debug_img, (win_xleft_low, win_y_low), (win_xleft_high, win_y_high), (0, 255, 0), 2)
-            cv.rectangle(self.debug_img, (win_xright_low, win_y_low), (win_xright_high, win_y_high), (0, 255, 0), 2)
+            if index == 0: 
+                cv.rectangle(self.debug_img, (win_xleft_low, win_y_low), (win_xleft_high, win_y_high), (255, 255, 0), 2)
+                cv.rectangle(self.debug_img, (win_xright_low, win_y_low), (win_xright_high, win_y_high), (255, 255, 0), 2)
+            else:
+                cv.rectangle(self.debug_img, (win_xleft_low, win_y_low), (win_xleft_high, win_y_high), (0, 255, 0), 2)
+                cv.rectangle(self.debug_img, (win_xright_low, win_y_low), (win_xright_high, win_y_high), (0, 255, 0), 2)
 
         # Get the indices where the coordinates of the image are not
         # zero but in the window (defined by the win_y_low, ...)
@@ -132,8 +160,17 @@ class SlidingWindow():
         # Change the current indices
         if len(left_inds) > self.MIN_PIX:
             self.current_leftx = int(np.mean(self.nonzerox[left_inds]))
+            if index == 0:
+                self.last_frame_left_x = self.current_leftx
         if len(right_inds) > self.MIN_PIX:
             self.current_rightx = int(np.mean(self.nonzerox[right_inds]))
+            if index == 0:
+                self.last_frame_right_x = self.current_rightx
+
+        # Save x coordinate of first window from this frame for next frame to search here for lane (doesn't jump around)
+        # if index == self.N_WINDOWS - 1:
+        #     self.last_frame_left_x = self.current_leftx
+        #     self.last_frame_right_x = self.current_rightx
 
 
     def _generate_line_coordinates(self, img_y_shape, img_x_shape):
