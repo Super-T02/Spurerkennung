@@ -11,10 +11,11 @@ class SlidingWindow():
     
     # Configuration
     N_WINDOWS = 10
-    MARGIN = 100
+    MARGIN = 80
     MIN_PIX = 20
-    THRESH = (150, 255)
-    LANE_WIDTH_FOR_SEARCH = 20
+    THRESH = (130, 255)
+    LANE_WIDTH_FOR_SEARCH = 10
+    SCALING_OF_BOX_WIDTH = 5
 
     def __init__(self, thresh = None, debug = False, debug_plots = False) -> None:
         self.per_tran = per.Transformation(True)
@@ -51,6 +52,11 @@ class SlidingWindow():
     def apply_sliding_window(self, img):
         # Preprocess the image
         img_transformed, M_reverse = self._preprocess(img)
+
+#TODO: make mask for image, see def _segmentation(self, img): (main)
+#                               def _getVerticesROI(self, img): (main)
+
+
         if self.debug:
             cv.imshow('transformed', img_transformed)            
         # Set local vars
@@ -136,10 +142,10 @@ class SlidingWindow():
         win_y_high = img_y_shape - index * self.window_height
         
         # Define box-window coordinates
-        win_xleft_low = self.current_leftx - self.MARGIN
-        win_xleft_high = self.current_leftx + self.MARGIN
-        win_xright_low = self.current_rightx - self.MARGIN
-        win_xright_high = self.current_rightx + self.MARGIN
+        win_xleft_low = self.current_leftx - (self.MARGIN + index * self.SCALING_OF_BOX_WIDTH)
+        win_xleft_high = self.current_leftx + (self.MARGIN + index * self.SCALING_OF_BOX_WIDTH)
+        win_xright_low = self.current_rightx - (self.MARGIN + index * self.SCALING_OF_BOX_WIDTH)
+        win_xright_high = self.current_rightx + (self.MARGIN + index * self.SCALING_OF_BOX_WIDTH)
 
         # Define rectangle
         if self.debug:
