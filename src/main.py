@@ -153,7 +153,7 @@ class Main():
             if len(right_x) > 0 and len(right_y) > 0:
                 self.right_line = self._get_polyLine_Points(self.equilized_img, right_x , right_y, self.RIGHT_FIX, 610)
             
-            img = self._draw_poly_line_hugh(self.equilized_img, self.left_line)
+            img = self._draw_poly_line_hugh(self.equilized_img, self.left_line, (255,0,0))
             img = self._draw_poly_line_hugh(self.equilized_img, self.right_line)
 
         return img
