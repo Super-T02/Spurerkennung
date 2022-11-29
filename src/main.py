@@ -251,18 +251,21 @@ class Main():
             }
             return ret
 
+        factor = 0.06
+
         for line in lines:
-            if line[0][0] <= mid:
+            # Everything 10% left of the mid
+            if line[0][0] <= mid - (mid * factor):
                 left_x.append(line[0][0])
                 left_y.append(line[0][1])
-            else:
+            elif line[0][0] >= mid + (mid * factor):
                 right_x.append(line[0][0])
                 right_y.append(line[0][1])
 
-            if line[0][2] <= mid:
+            if line[0][2] <= mid - (mid * factor):
                 left_x.append(line[0][2])
                 left_y.append(line[0][3])
-            else:
+            elif line[0][0] >= mid + (mid * factor):
                 right_x.append(line[0][2])
                 right_y.append(line[0][3])
         
@@ -327,33 +330,33 @@ if __name__ == '__main__':
     videoHarder = "img/Udacity/challenge_video.mp4"
     roi_videoHarder = [
             (300, - 75),
-            (-60, 70),
-            (40, 70),
-            (-150, - 75),
+            (-40, 90),
+            (50, 80),
+            (-325, - 75),
     ]
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
     roi_videoHardest = [
             (300, - 75),
-            (-60, 70),
-            (40, 70),
-            (-150, - 75),
+            (-60, 75),
+            (40, 75),
+            (150, - 75),
     ]
     
     # Start the program
     main = Main(video, roi_video, 1, debug=False) # canny_lower=50, canny_upper=100 if you change the order of areal view preprocessing 
-    main1 = Main(videoHarder, roi_videoHarder, canny_lower=15, canny_upper=30)
+    main1 = Main(videoHarder, roi_videoHarder, canny_lower=15, canny_upper=100, debug=True)
     main2 = Main(videoHardest, roi_videoHardest)
 
     # Mode:
     # - 0: Hough
     # - 1: Sliding window
 
-    main.startVideo()
-    main.startVideo(mode=1)
-    main.startVideo(hough=True, show_areal=True)
+    # main.startVideo()
+    # main.startVideo(mode=1)
+    # main.startVideo(hough=True, show_areal=True)
     main.startVideo(hough=True)
     # main1.startVideo()
-    # main1.startVideo(hough=True)
+    main1.startVideo(hough=True)
     # main2.startVideo()
     # main2.startVideo(hough=True)
     
