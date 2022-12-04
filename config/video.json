@@ -9,6 +9,9 @@
         "CANNY_UPPER": 150,
         "LEFT_FIX": [200, 720],
         "RIGHT_FIX": [1200, 720],
+        "BORDER_LEFT": 580,
+        "BORDER_RIGHT": 610,
+        "POLY_HEIGHT": 400,
         "ROI": [
             [300, -75],
             [-55, 72],

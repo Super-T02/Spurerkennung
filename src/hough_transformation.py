@@ -51,6 +51,12 @@ class HoughTransformation():
             return 'Error: LEFT_FIX is missing'
         if not 'RIGHT_FIX' in config['HOUGH'].keys():
             return 'Error: RIGHT_FIX is missing'
+        if not 'BORDER_LEFT' in config['HOUGH'].keys():
+            return 'Error: BORDER_LEFT is missing'
+        if not 'BORDER_RIGHT' in config['HOUGH'].keys():
+            return 'Error: BORDER_RIGHT is missing'
+        if not 'POLY_HEIGHT' in config['HOUGH'].keys():
+            return 'Error: POLY_HEIGHT is missing'
         
         self.canny_lower = config['HOUGH']['CANNY_LOWER']
         self.canny_upper = config['HOUGH']['CANNY_UPPER']
@@ -62,6 +68,9 @@ class HoughTransformation():
         self.max_line_gap = config['HOUGH']['MAX_LINE_GAP']
         self.left_fix = config['HOUGH']['LEFT_FIX']
         self.right_fix = config['HOUGH']['RIGHT_FIX']
+        self.border_left = config['HOUGH']['BORDER_LEFT']
+        self.border_right = config['HOUGH']['BORDER_RIGHT']
+        self.poly_height = config['HOUGH']['POLY_HEIGHT']
         
         
         self.loaded = True
@@ -103,10 +112,10 @@ class HoughTransformation():
         right_line = None
         
         if len(left_x) > 0 and len(left_y) > 0:
-            left_line = self._get_polyLine_points(img, left_x, left_y, self.left_fix, 500)
+            left_line = self._get_polyLine_points(img, left_x, left_y, self.left_fix, self.border_left)
 
         if len(right_x) > 0 and len(right_y) > 0:
-            right_line = self._get_polyLine_points(img, right_x , right_y, self.right_fix, 610)
+            right_line = self._get_polyLine_points(img, right_x , right_y, self.right_fix, self.border_right)
         
         if left_line:
             processed_img = self._draw_poly_line_hugh(img, left_line, (255,0,0))
@@ -205,6 +214,8 @@ class HoughTransformation():
 
         # Segmentation of the image
         img = self.pre.segmentation(img, self.roi)
+        if self.debug:
+            cv.imshow("Debug: Segmentation", img)
         
         return img
 
@@ -344,7 +355,7 @@ class HoughTransformation():
         poly = np.polyfit(y,x,2)
 
         # Generate the points
-        plot_y = np.linspace(385, img.shape[0] - 1, img.shape[0])
+        plot_y = np.linspace(self.poly_height, img.shape[0] - 1, img.shape[0])
         fit_x = poly[0] * plot_y**2 + poly[1] * plot_y + poly[2]
         
         return {

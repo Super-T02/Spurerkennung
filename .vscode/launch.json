@@ -35,6 +35,14 @@
             "program": "src/sliding_window.py",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Python: Hough",
+            "type": "python",
+            "request": "launch",
+            "program": "src/hough_transformation.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }
