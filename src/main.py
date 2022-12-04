@@ -21,14 +21,18 @@ class Main():
     CANNY_UPPER = 150
 
     # Hough Settings
-    HOUG_RHO = 2
-    HOUG_THETA = 180
-    HOUGH_THRESHOLD = 120
-    HOUGH_MIN_LINE_LENGTH = 40
-    HOUGH_MAX_LINE_GAP = 5
+    HOUG_RHO = 6
+    HOUG_THETA = 90
+    HOUGH_THRESHOLD = 100
+    HOUGH_MIN_LINE_LENGTH = 3
+    HOUGH_MAX_LINE_GAP = 2
+
+    # FIX Point Hough
+    LEFT_FIX = (200, 720)
+    RIGHT_FIX = (1200, 720)
 
 
-    def __init__(self, path, roi, canny_lower = None, canny_upper = None, thresh = None):
+    def __init__(self, path, roi, canny_lower = None, canny_upper = None, thresh = None, debug = False):
         print('Willkommen beim Projekt "Erkennung von Spurmarkierungen"')
         if path is None or roi is None: return print('No path or roi given')
         self.calib = cal.Calibration(False)
@@ -37,6 +41,17 @@ class Main():
         
         self.path = path
         self.roi = roi
+        self.debug = debug
+
+        # TODO: Refactor Hough
+        self.left_line = {
+            'FIT_X': [],
+            'PLOT_Y': [],
+        }
+        self.right_line = {
+            'FIT_X': [],
+            'PLOT_Y': [],
+        }
 
         self.canny_lower = canny_lower if canny_lower is not None else self.CANNY_LOWER
         self.canny_upper = canny_upper if canny_upper is not None else self.CANNY_UPPER
@@ -123,8 +138,23 @@ class Main():
         # Get the hough lines
         if hough:
             lines = self._getHoughLines(img)
-            img = self._drawLines(self.equilized_img, lines)
+            if self.debug: 
+                img_debug = self._drawLines(self.equilized_img, lines)
+                cv.imshow("Debug: Hugh", img_debug)
+            line_info = self._group_line_points(self.equilized_img, lines)
+            left_x = line_info['LEFT_X']
+            left_y = line_info['LEFT_Y']
+            right_x = line_info['RIGHT_X']
+            right_y = line_info['RIGHT_Y']
+            
+            if len(left_x) > 0 and len(left_y) > 0:
+                self.left_line = self._get_polyLine_Points(self.equilized_img, left_x, left_y, self.LEFT_FIX, 500)
 
+            if len(right_x) > 0 and len(right_y) > 0:
+                self.right_line = self._get_polyLine_Points(self.equilized_img, right_x , right_y, self.RIGHT_FIX, 610)
+            
+            img = self._draw_poly_line_hugh(self.equilized_img, self.left_line, (255,0,0))
+            img = self._draw_poly_line_hugh(self.equilized_img, self.right_line)
 
         return img
 
@@ -155,8 +185,9 @@ class Main():
         width = dim[1]
         roi = [
             (self.roi[0][0], height + self.roi[0][1]),
-            ((width + self.roi[1][0]) / 2, (height + self.roi[1][1]) / 2),
-            (width + self.roi[2][0], height + self.roi[2][1]),
+            ((width / 2) + self.roi[1][0], (height / 2) + self.roi[1][1]),
+            ((width / 2) + self.roi[2][0], (height / 2) + self.roi[2][1]),
+            (width + self.roi[3][0], height + self.roi[3][1]),
         ]
 
         return roi
@@ -201,43 +232,131 @@ class Main():
         )
         return lines
 
+    def _group_line_points(self, img, lines):
+         # Get the mid of the picture
+        mid = img.shape[1]//2
+
+        left_x = []
+        left_y = []
+
+        right_x = []
+        right_y = []
+        
+        if lines is None:
+            ret = {
+                'LEFT_X': left_x,
+                'LEFT_Y': left_y,
+                'RIGHT_X': right_x,
+                'RIGHT_Y': right_y,
+            }
+            return ret
+
+        factor = 0.06
+
+        for line in lines:
+            # Everything 10% left of the mid
+            if line[0][0] <= mid - (mid * factor):
+                left_x.append(line[0][0])
+                left_y.append(line[0][1])
+            elif line[0][0] >= mid + (mid * factor):
+                right_x.append(line[0][0])
+                right_y.append(line[0][1])
+
+            if line[0][2] <= mid - (mid * factor):
+                left_x.append(line[0][2])
+                left_y.append(line[0][3])
+            elif line[0][0] >= mid + (mid * factor):
+                right_x.append(line[0][2])
+                right_y.append(line[0][3])
+        
+        ret = {
+            'LEFT_X': left_x,
+            'LEFT_Y': left_y,
+            'RIGHT_X': right_x,
+            'RIGHT_Y': right_y,
+        }
+        
+        return ret
+
+    def _get_polyLine_Points(self, img, x, y, fix_point, border):
+        # Add point of car if the nearest point is further away then the
+        # provided value
+        if y[np.argmax(y)] < border:
+            x.append(fix_point[0])
+            y.append(fix_point[1])
+
+        #Generate poly lines
+        poly = np.polyfit(y,x,2)
+
+        # Generate the points
+        plot_y = np.linspace(385, img.shape[0] - 1, img.shape[0])
+        fit_x = poly[0] * plot_y**2 + poly[1] * plot_y + poly[2]
+
+        info = {
+            'FIT_X': fit_x,
+            'PLOT_Y': plot_y,
+        }
+
+        return info
+
+    def _draw_poly_line_hugh(self, img, draw_info, color = (0,0,255)):
+        # Unpack draw Info
+        fit_x = draw_info['FIT_X']
+        plot_y = draw_info['PLOT_Y']
+
+        # Check whether data exist
+        if len(fit_x) <= 0 and len(plot_y) <= 0:
+            return img
+
+        # Generate the points of the lane
+        pts = np.array(np.transpose(np.vstack([fit_x, plot_y])))
+
+        pts = pts.reshape((-1, 1, 2))
+
+        # Draw the driving lane in the transformed image
+        cv.polylines(img, np.int_([pts]), False, color, 4)
+
+        return img
 
 if __name__ == '__main__':
     # Path to video
     video = "img/Udacity/project_video.mp4"
     roi_video = [
-            (80, - 75),
-            (50, 120),
-            (-120, - 75),
+            (300, - 75), # BOTTOM LEFT
+            (-55, 72), # TOP LEFT
+            (78, 72), # TOP RIGHT
+            (-150, - 75), # BOTTOM RIGHT
     ]
     videoHarder = "img/Udacity/challenge_video.mp4"
     roi_videoHarder = [
-            (180, - 75),
-            (80, 160),
-            (-180, - 75),
+            (300, - 75),
+            (-40, 90),
+            (50, 80),
+            (-325, - 75),
     ]
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
     roi_videoHardest = [
-            (80, - 75),
-            (50, 120),
-            (-120, - 75),
+            (300, - 75),
+            (-60, 75),
+            (40, 75),
+            (150, - 75),
     ]
     
     # Start the program
-    main = Main(video, roi_video, 1) # canny_lower=50, canny_upper=100 if you change the order of areal view preprocessing 
-    main1 = Main(videoHarder, roi_videoHarder, canny_lower=15, canny_upper=30)
+    main = Main(video, roi_video, 1, debug=False) # canny_lower=50, canny_upper=100 if you change the order of areal view preprocessing 
+    main1 = Main(videoHarder, roi_videoHarder, canny_lower=15, canny_upper=100, debug=True)
     main2 = Main(videoHardest, roi_videoHardest)
 
     # Mode:
     # - 0: Hough
     # - 1: Sliding window
 
-    main.startVideo()
-    main.startVideo(mode=1)
-    main.startVideo(hough=True, show_areal=True)
+    # main.startVideo()
+    # main.startVideo(mode=1)
+    # main.startVideo(hough=True, show_areal=True)
     main.startVideo(hough=True)
     # main1.startVideo()
-    # main1.startVideo(hough=True, show_areal=True)
+    main1.startVideo(hough=True)
     # main2.startVideo()
     # main2.startVideo(hough=True)
     
