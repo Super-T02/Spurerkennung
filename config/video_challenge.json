@@ -1,22 +1,30 @@
 {
     "HOUGH": {
         "RHO": 6,
-        "THETA": 90,
-        "THRESHOLD": 100,
-        "MIN_LINE_LENGTH": 3,
-        "MAX_LINE_GAP": 2,
-        "CANNY_LOWER": 100,
-        "CANNY_UPPER": 150,
-        "LEFT_FIX": [200, 720],
-        "RIGHT_FIX": [1200, 720],
+        "THETA": 40,
+        "THRESHOLD": 50,
+        "MIN_LINE_LENGTH": 0.5,
+        "MAX_LINE_GAP": 5,
+        "CANNY_LOWER": 10,
+        "CANNY_UPPER": 90,
+        "LEFT_FIX": [150, 720],
+        "RIGHT_FIX": [1100, 720],
         "BORDER_LEFT": 580,
-        "BORDER_RIGHT": 610,
-        "POLY_HEIGHT": 400,
+        "BORDER_RIGHT": 650,
+        "POLY_HEIGHT": 410,
+        "MIN_COLOR": [20, 35, 140],
+        "MAX_COLOR": [70, 255, 255],
         "ROI": [
             [300, -75],
-            [-55, 72],
-            [78, 72],
-            [-150, -75]
+            [10, 90],
+            [60, 80],
+            [-270, -75]
+        ],
+        "ROI2": [
+            [450, -75],
+            [50, 72],
+            [50, 72],
+            [-400, -75]
         ]
     },
     "SLIDING_WINDOWS": {

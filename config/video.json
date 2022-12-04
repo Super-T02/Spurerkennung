@@ -12,11 +12,19 @@
         "BORDER_LEFT": 580,
         "BORDER_RIGHT": 610,
         "POLY_HEIGHT": 400,
+        "MIN_COLOR": [],
+        "MAX_COLOR": [],
         "ROI": [
             [300, -75],
             [-55, 72],
             [78, 72],
             [-150, -75]
+        ],
+        "ROI2": [
+            [450, -75],
+            [50, 72],
+            [50, 72],
+            [-400, -75]
         ]
     },
     "SLIDING_WINDOWS": {
