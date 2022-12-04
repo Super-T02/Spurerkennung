@@ -20,13 +20,27 @@
         ]
     },
     "SLIDING_WINDOWS": {
-        "N_WINDOWS": 10,
-        "MARGIN": 80,
-        "MIN_PIX": 20,
+        "N_WINDOWS": 20,
+        "MARGIN": 25,
+        "MIN_PIX": 10,
         "THRESH": [180, 255],
         "LANE_WIDTH_FOR_SEARCH": 10,
         "SCALING_OF_BOX_WIDTH": 5,
-        "MIN_COLOR": [20, 35, 140],
-        "MAX_COLOR": [70, 255, 255]
+        "MIN_COLOR": [20, 17, 170],
+        "MAX_COLOR": [50, 150, 250],
+        "TRANS_MATRIX": {
+            "SRC": [
+                [595, 416],
+                [680, 416],
+                [320, 579],
+                [964, 579]
+            ],
+            "DST": [
+                [300,0],
+                [980,0],
+                [350,620],
+                [980,620]         
+            ]
+        }
     }
 }

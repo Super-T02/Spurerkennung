@@ -58,6 +58,8 @@ class SlidingWindow():
             return 'Error: MIN_COLOR is missing'
         if not 'MAX_COLOR' in config['SLIDING_WINDOWS'].keys():
             return 'Error: MAX_COLOR is missing'
+        if not 'TRANS_MATRIX' in config['SLIDING_WINDOWS'].keys():
+            return 'Error: TRANS_MATRIX is missing'
         
         self.n_windows = config['SLIDING_WINDOWS']['N_WINDOWS']
         self.margin = config['SLIDING_WINDOWS']['MARGIN']
@@ -67,6 +69,7 @@ class SlidingWindow():
         self.scaling_of_box_width = config['SLIDING_WINDOWS']['SCALING_OF_BOX_WIDTH']
         self._min_color = config['SLIDING_WINDOWS']['MIN_COLOR']
         self._max_color = config['SLIDING_WINDOWS']['MAX_COLOR']
+        self.trans_matrix = config['SLIDING_WINDOWS']['TRANS_MATRIX']
         
         self.loaded = True
         
@@ -144,7 +147,7 @@ class SlidingWindow():
         img = self.pre.gauss(img)
         
         # Threshold the image to areal view
-        img_transformed, M_reversed = self.transformation.transform_image_perspective(img)
+        img_transformed, M_reversed = self.transformation.transform_image_perspective(img, self.trans_matrix)
         
         # Apply threshold
         img_transformed = self.pre.threshold(img_transformed, self.thresh)
@@ -444,5 +447,6 @@ if __name__ == '__main__':
 
     slide_win = SlidingWindow(debug=True)
     slide_win.debug_video(video, "./config/video.json")
+    # slide_win.debug_video(videoHarder, "./config/video_challenge.json")
     # slide_win.debug_video(videoHarder)
     # slide_win.debug_video(videoHardest)

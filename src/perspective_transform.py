@@ -28,11 +28,9 @@ class Transformation():
         return src, dst
 
 
-    def _calculate_matrix(self, img):
-        height = len(img) -1
-        width = len(img[0]) -1
-
-        src_coor, dst_coor = self._get_transformation_coordinates(height, width)
+    def _calculate_matrix(self, img, trans_matrix):
+        src_coor = trans_matrix['SRC']
+        dst_coor = trans_matrix['DST']
         src = np.float32([src_coor[0], src_coor[1], src_coor[2], src_coor[3]]) 
         dst = np.float32([dst_coor[0], dst_coor[1], dst_coor[2], dst_coor[3]])
 
@@ -41,8 +39,8 @@ class Transformation():
         return M, M_reversed
 
 
-    def transform_image_perspective(self, img):
-        M, M_reversed = self._calculate_matrix(img)
+    def transform_image_perspective(self, img, trans_matrix):
+        M, M_reversed = self._calculate_matrix(img, trans_matrix)
 
         img_transformed = cv.warpPerspective(img,M,(img.shape[1], img.shape[0]),flags=cv.INTER_LINEAR) #TODO: possibly change this flag in future versions, maybe: INTER_NEAREST
 
