@@ -1,0 +1,19 @@
+{
+    "HOUGH": {
+        "RHO": 6,
+        "THETA": 90,
+        "THRESHOLD": 100,
+        "MIN_LINE_LENGTH": 3,
+        "MAX_LINE_GAP": 2,
+        "CANNY_LOWER": 100,
+        "CANNY_UPPER": 150,
+        "LEFT_FIX": [200, 720],
+        "RIGHT_FIX": [1200, 720],
+        "ROI": [
+            [300, -75],
+            [-55, 72],
+            [78, 72],
+            [-150, -75]
+        ]
+    }
+}

@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 import time
+import json
 
 import calib as cal
 import preprocess as pre
@@ -22,43 +23,83 @@ class HoughTransformation():
     LEFT_FIX = (200, 720)
     RIGHT_FIX = (1200, 720)
 
-    def __init__(self, roi, canny_lower = CANNY_LOWER, canny_upper = CANNY_UPPER, rho = RHO, theta = THETA, threshold = THRESHOLD, min_line_length = MIN_LINE_LENGTH, 
-    max_line_gap = MAX_LINE_GAP, debug = False, left_fix = LEFT_FIX, right_fix = RIGHT_FIX) -> None:
+    def __init__(self, config_path, debug = False) -> None:
         """Constructor of the class HoughTransformation
 
         Args:
-            roi (Array): Region of interest for the mask (Rectangle)
-            canny_lower (int, optional): Lower border for canny edge detection. Defaults to CANNY_LOWER.
-            canny_upper (int, optional): Upper border for the canny
-            edge detection. Defaults to CANNY_UPPER.
-            rho (int, optional): Rho value for the Hough transformation. Defaults to RHO.
-            theta (int, optional): Theta value for the Hough transformation. Defaults to THETA.
-            threshold (_type_, optional): Threshold value for the Hough transformation. Defaults to THRESHOLD.
-            min_line_length (_type_, optional): Min Line Length value for the Hough transformation. Defaults to MIN_LINE_LENGTH.
-            max_line_gap (_type_, optional): Max Line Gap value for the Hough transformation. Defaults to MAX_LINE_GAP.
+            config_path (str): Path to the config file
             debug (bool, optional): Debug Mode on or off. Defaults to False.
-            left_fix (_type_, optional): Left Fix point for the line generation. Defaults to LEFT_FIX.
-            right_fix (_type_, optional): Right Fix point for the line generation. Defaults to RIGHT_FIX.
         """
         self.pre = pre.Preprocess()
         self.debug = debug
+        self.loaded = False
         
-        # Preprocess
-        self.canny_lower = canny_lower
-        self.canny_upper = canny_upper
-        self.roi = roi
+        error = self._load_config(config_path)
+        if error:
+            print(error)
+            return 
+        
+        self.loaded = True
+        
+        # # Preprocess
+        # self.canny_lower = canny_lower
+        # self.canny_upper = canny_upper
+        # self.roi = roi
 
-        # Hough
-        self.rho = rho
-        self.theta = theta
-        self.threshold = threshold
-        self.min_line_length = min_line_length
-        self.max_line_gap = max_line_gap
+        # # Hough
+        # self.rho = rho
+        # self.theta = theta
+        # self.threshold = threshold
+        # self.min_line_length = min_line_length
+        # self.max_line_gap = max_line_gap
 
-        # Point Hough
-        self.left_fix = left_fix
-        self.right_fix = right_fix
+        # # Point Hough
+        # self.left_fix = left_fix
+        # self.right_fix = right_fix
+        
+    def _load_config(self, path):
+        
+        with open(path, 'r') as f:
+            config = json.load(f)
 
+        if not config:
+            return 'Error: Config file is empty'
+        if not 'HOUGH' in config.keys():
+            return 'Error: HOUGH is missing'
+        if not 'CANNY_LOWER' in config['HOUGH'].keys():
+            return 'Error: CANNY_LOWER is missing'
+        if not 'CANNY_UPPER' in config['HOUGH'].keys():
+            return 'Error: CANNY_UPPER is missing'
+        if not 'ROI' in config['HOUGH'].keys():
+            return 'Error: ROI is missing'
+        if not 'RHO' in config['HOUGH'].keys():
+            return 'Error: RHO is missing'
+        if not 'THETA' in config['HOUGH'].keys():
+            return 'Error: THETA is missing'
+        if not 'THRESHOLD' in config['HOUGH'].keys():
+            return 'Error: THRESHOLD is missing'
+        if not 'MIN_LINE_LENGTH' in config['HOUGH'].keys():
+            return 'Error: MIN_LINE_LENGTH is missing'
+        if not 'MAX_LINE_GAP' in config['HOUGH'].keys():
+            return 'Error: MAX_LINE_GAP is missing'
+        if not 'LEFT_FIX' in config['HOUGH'].keys():
+            return 'Error: LEFT_FIX is missing'
+        if not 'RIGHT_FIX' in config['HOUGH'].keys():
+            return 'Error: RIGHT_FIX is missing'
+        
+        self.canny_lower = config['HOUGH']['CANNY_LOWER']
+        self.canny_upper = config['HOUGH']['CANNY_UPPER']
+        self.roi = config['HOUGH']['ROI']
+        self.rho = config['HOUGH']['RHO']
+        self.theta = config['HOUGH']['THETA']
+        self.threshold = config['HOUGH']['THRESHOLD']
+        self.min_line_length = config['HOUGH']['MIN_LINE_LENGTH']
+        self.max_line_gap = config['HOUGH']['MAX_LINE_GAP']
+        self.left_fix = config['HOUGH']['LEFT_FIX']
+        self.right_fix = config['HOUGH']['RIGHT_FIX']
+        
+        return None
+        
 
     def execute(self, img):
         """Execute the Hough transformation with it pre-processing steps
@@ -69,6 +110,9 @@ class HoughTransformation():
         Returns:
             Image: The current frame
         """
+        
+        if not self.loaded:
+            return False
         
         processed_img = self._preprocess(img)
 
@@ -141,7 +185,9 @@ class HoughTransformation():
 
             # Test of the module
             frame = self.execute(frame)
-
+            if (type(frame) == bool and not frame) or not frame.any():
+                return print('Error: Module not loaded')
+            
             # Do operations on the frame
             font = cv.FONT_HERSHEY_SIMPLEX
             new_frame_time = time.time()
@@ -374,7 +420,7 @@ if __name__ == '__main__':
     videoHarder = "img/Udacity/challenge_video.mp4"
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
 
-    hough_transform = HoughTransformation(roi_video, debug=True)
+    hough_transform = HoughTransformation("./config/video.json", debug=True)
     hough_transform.debug_video(video)
     # hough_transform.debug_video(videoHarder)
     # hough_transform.debug_video(videoHardest)

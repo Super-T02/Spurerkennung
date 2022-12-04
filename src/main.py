@@ -3,7 +3,6 @@ import os
 import time
 
 import calib as cal
-import perspective_transform as per
 import sliding_window as slw
 import hough_transformation as hou
 
@@ -12,15 +11,13 @@ class Main():
     WIN_X = 1280
     WIN_Y = 720
 
-    def __init__(self, path, roi, canny_lower = None, canny_upper = None, thresh = None, debug = False):
+    def __init__(self, path, config_path, debug=False):
         print('Willkommen beim Projekt "Erkennung von Spurmarkierungen"')
-        if path is None or roi is None: return print('No path or roi given')
-        
+                
         # Define the objects
         self.calib = cal.Calibration(debug=debug)
-        self.transformation = per.Transformation(debug=debug)
         self.sliding_win = slw.SlidingWindow()
-        self.hough = hou.HoughTransformation(roi, debug = debug)
+        self.hough = hou.HoughTransformation(config_path, debug = debug)
         
         # Define the variables
         self.path = path
@@ -55,10 +52,12 @@ class Main():
                 frame = self.sliding_win.execute(frame)
             else:
                 return print('Mode not found')
+            
+            if (type(frame) == bool and not frame) or not frame.any():
+                return print('Error: Module not loaded')
 
             # Do operations on the frame
             if frame is not None:
-                #transformed = self.transformation.transform_image_perspective(frame)
                 font = cv.FONT_HERSHEY_SIMPLEX
                 new_frame_time = time.time()
 
@@ -114,7 +113,7 @@ if __name__ == '__main__':
     ]
     
     # Start the program
-    main = Main(video, roi_video, 1, debug=False) # canny_lower=50, canny_upper=100 if you change the order of areal view preprocessing 
+    main = Main(video, "./config/video.json", debug=False) # canny_lower=50, canny_upper=100 if you change the order of areal view preprocessing 
     # main1 = Main(videoHarder, roi_videoHarder, canny_lower=15, canny_upper=100, debug=True)
     # main2 = Main(videoHardest, roi_videoHardest)
 
