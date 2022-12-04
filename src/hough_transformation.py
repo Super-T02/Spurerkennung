@@ -398,6 +398,7 @@ if __name__ == '__main__':
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
 
     hough_transform = HoughTransformation( debug=True)
-    hough_transform.debug_video(video, "./config/video.json")
+    # hough_transform.debug_video(video, "./config/video.json")
+    hough_transform.debug_video(videoHarder, "./config/video_challenge.json")
     # hough_transform.debug_video(videoHarder)
     # hough_transform.debug_video(videoHardest)
