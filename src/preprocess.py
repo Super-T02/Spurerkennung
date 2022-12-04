@@ -18,7 +18,7 @@ class Preprocess():
         return cv.threshold(img, thresh[0], thresh[1], cv.THRESH_BINARY)[1]
 
     
-    def segmentation(self, img, roi):
+    def segmentation(self, img, roi, negative = False):
         # Define a blank matrix that matches the image height/width.
         mask = np.zeros_like(img)
 
@@ -27,9 +27,11 @@ class Preprocess():
         # Fill inside the polygon
         vertices = self._generateCoordinatesRectangle(img, roi)
         cv.fillPoly(mask, np.array([vertices], np.int32), match_mask_color)
+        if negative: mask = cv.bitwise_not(mask)
         
         # Returning the image only where mask pixels match
         masked_image = cv.bitwise_and(img, mask)
+        
         return masked_image
 
     def _generateCoordinatesRectangle(self, img, roi):

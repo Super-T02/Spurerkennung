@@ -57,10 +57,15 @@ class HoughTransformation():
             return 'Error: BORDER_RIGHT is missing'
         if not 'POLY_HEIGHT' in config['HOUGH'].keys():
             return 'Error: POLY_HEIGHT is missing'
+        if not 'MIN_COLOR' in config['HOUGH'].keys():
+            return 'Error: MIN_COLOR is missing'
+        if not 'MAX_COLOR' in config['HOUGH'].keys():
+            return 'Error: MAX_COLOR is missing'
         
         self.canny_lower = config['HOUGH']['CANNY_LOWER']
         self.canny_upper = config['HOUGH']['CANNY_UPPER']
         self.roi = config['HOUGH']['ROI']
+        self.roi2 = config['HOUGH']['ROI2'] if 'ROI2' in config['HOUGH'].keys() else None
         self.rho = config['HOUGH']['RHO']
         self.theta = config['HOUGH']['THETA']
         self.threshold = config['HOUGH']['THRESHOLD']
@@ -71,6 +76,8 @@ class HoughTransformation():
         self.border_left = config['HOUGH']['BORDER_LEFT']
         self.border_right = config['HOUGH']['BORDER_RIGHT']
         self.poly_height = config['HOUGH']['POLY_HEIGHT']
+        self._min_color = config['HOUGH']['MIN_COLOR']
+        self._max_color = config['HOUGH']['MAX_COLOR']
         
         
         self.loaded = True
@@ -203,6 +210,12 @@ class HoughTransformation():
         Returns:
             Image: The current frame
         """
+        # Find the yellow line
+        if self._min_color and self._max_color:
+            img = self.pre.map_color(img, self._min_color, self._max_color)
+            if self.debug:
+                cv.imshow('yellow', img)
+        
         # Convert to grayscale
         img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
 
@@ -214,6 +227,8 @@ class HoughTransformation():
 
         # Segmentation of the image
         img = self.pre.segmentation(img, self.roi)
+        if self.roi2:
+            img = self.pre.segmentation(img, self.roi2, True)
         if self.debug:
             cv.imshow("Debug: Segmentation", img)
         
@@ -397,7 +412,7 @@ if __name__ == '__main__':
     videoHarder = "img/Udacity/challenge_video.mp4"
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
 
-    hough_transform = HoughTransformation( debug=True)
+    hough_transform = HoughTransformation(debug=True)
     # hough_transform.debug_video(video, "./config/video.json")
     hough_transform.debug_video(videoHarder, "./config/video_challenge.json")
     # hough_transform.debug_video(videoHarder)
