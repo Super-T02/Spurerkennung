@@ -11,20 +11,33 @@ class Main():
     WIN_X = 1280
     WIN_Y = 720
 
-    def __init__(self, path, config_path, debug=False):
+    def __init__(self, path, debug=False):
         print('Willkommen beim Projekt "Erkennung von Spurmarkierungen"')
                 
         # Define the objects
         self.calib = cal.Calibration(debug=debug)
-        self.sliding_win = slw.SlidingWindow(config_path, debug=debug)
-        self.hough = hou.HoughTransformation(config_path, debug = debug)
+        self.sliding_win = slw.SlidingWindow(debug=debug)
+        self.hough = hou.HoughTransformation(debug = debug)
         
         # Define the variables
         self.path = path
         
-    def startVideo(self, mode=0):
+    def startVideo(self, mode=0, config_path="./config/video.json"):
         if not os.path.exists(self.path):
             return print('Video not found')
+        
+        # Load config
+        error = None
+        if mode==0:
+            error = self.hough.load_config(config_path)
+        elif mode == 1:
+            error = self.sliding_win.load_config(config_path)
+        else:
+            error = "Mode not found"
+        
+        if error:
+            print(error)
+            return 
 
         # Load video
         video = cv.VideoCapture(self.path)
@@ -113,7 +126,7 @@ if __name__ == '__main__':
     ]
     
     # Start the program
-    main = Main(video, "./config/video.json", debug=False) # canny_lower=50, canny_upper=100 if you change the order of areal view preprocessing 
+    main = Main(video, debug=False) # canny_lower=50, canny_upper=100 if you change the order of areal view preprocessing 
     # main1 = Main(videoHarder, roi_videoHarder, canny_lower=15, canny_upper=100, debug=True)
     # main2 = Main(videoHardest, roi_videoHardest)
 
@@ -122,8 +135,8 @@ if __name__ == '__main__':
     # - 1: Sliding window
 
     # main.startVideo()
-    main.startVideo(mode=0)
-    main.startVideo(mode=1)
+    main.startVideo(mode=0, config_path="./config/video.json")
+    main.startVideo(mode=1, config_path="./config/video.json")
     # main.startVideo(hough=True, show_areal=True)
     # main.startVideo(hough=True)
     # main1.startVideo()

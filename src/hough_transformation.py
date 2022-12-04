@@ -2,13 +2,14 @@ import cv2 as cv
 import numpy as np
 import time
 import json
+import os
 
 import calib as cal
 import preprocess as pre
 
 class HoughTransformation():
 
-    def __init__(self, config_path, debug = False) -> None:
+    def __init__(self, debug = False) -> None:
         """Constructor of the class HoughTransformation
 
         Args:
@@ -19,14 +20,9 @@ class HoughTransformation():
         self.debug = debug
         self.loaded = False
         
-        error = self._load_config(config_path)
-        if error:
-            print(error)
-            return 
-        
-        self.loaded = True
-        
-    def _load_config(self, path):
+    def load_config(self, path):
+        if not os.path.exists(path):
+            return print('File '+ path +' not found')
         
         with open(path, 'r') as f:
             config = json.load(f)
@@ -67,6 +63,8 @@ class HoughTransformation():
         self.left_fix = config['HOUGH']['LEFT_FIX']
         self.right_fix = config['HOUGH']['RIGHT_FIX']
         
+        
+        self.loaded = True
         return None
         
 
@@ -118,7 +116,7 @@ class HoughTransformation():
         return processed_img
 
 
-    def debug_video(self, path):
+    def debug_video(self, path, config_path):
         """Video for debugging the video itself
 
         Args:
@@ -129,6 +127,11 @@ class HoughTransformation():
         """
         if not self.debug:
             return print('Debug mode deactivated, passing...')
+        
+        error = self.load_config(config_path)
+        if error:
+            print(error)
+            return 
 
         calib = cal.Calibration(debug=False)
 
@@ -383,7 +386,7 @@ if __name__ == '__main__':
     videoHarder = "img/Udacity/challenge_video.mp4"
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
 
-    hough_transform = HoughTransformation("./config/video.json", debug=True)
-    hough_transform.debug_video(video)
+    hough_transform = HoughTransformation( debug=True)
+    hough_transform.debug_video(video, "./config/video.json")
     # hough_transform.debug_video(videoHarder)
     # hough_transform.debug_video(videoHardest)

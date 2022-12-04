@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import time
 import json
+import os
 
 import calib as cal
 import perspective_transform as per
@@ -10,18 +11,10 @@ import preprocess as pre
 
 class SlidingWindow():
     
-    def __init__(self, config_path, debug = False, debug_plots = False) -> None:
+    def __init__(self, debug = False, debug_plots = False) -> None:
         """Constructor for the SlidingWindow class
 
         Args:
-            thresh (tuple, optional): Threshold for preprocessing . Defaults to THRESH.
-            n_windows (int, optional): Number of sliding windows. Defaults to N_WINDOWS.
-            margin (int, optional): margin of the sliding window. Defaults to MARGIN.
-            min_pix (int, optional): Minimal number of pixels to
-            detect a line. Defaults to MIN_PIX.
-            lane_width_for_search (int, optional): Margin for
-            searching a line in the frame. Defaults to LANE_WIDTH_FOR_SEARCH.
-            scaling_of_box_width (int, optional): Scale of the next window. Defaults to SCALING_OF_BOX_WIDTH.
             debug (bool, optional): Debug mode. Defaults to False.
             debug_plots (bool, optional): Debug mode with plot of histogram. Defaults to False.
         """
@@ -30,14 +23,7 @@ class SlidingWindow():
         self.pre = pre.Preprocess()
         self.debug = debug
         self.debug_plots = debug_plots
-        self.loaded = False
-        
-        error = self._load_config(config_path)
-        if error:
-            print(error)
-            return 
-        
-        self.loaded = True
+        self.loaded = False   
         
         # Remember last frames and draw information
         self.last_draw_info = None
@@ -45,7 +31,9 @@ class SlidingWindow():
         self.last_frame_left_x = None
     
         
-    def _load_config(self, path):
+    def load_config(self, path):
+        if not os.path.exists(path):
+            return print('File '+ path +' not found')
         
         with open(path, 'r') as f:
             config = json.load(f)
@@ -73,6 +61,8 @@ class SlidingWindow():
         self.thresh = config['SLIDING_WINDOWS']['THRESH']
         self.land_width_for_search = config['SLIDING_WINDOWS']['LANE_WIDTH_FOR_SEARCH']
         self.scaling_of_box_width = config['SLIDING_WINDOWS']['SCALING_OF_BOX_WIDTH']
+        
+        self.loaded = True
         
         return None
         
@@ -365,7 +355,7 @@ class SlidingWindow():
 
         return result
 
-    def debug_video(self, path):
+    def debug_video(self, path, config_path):
         """Debug the module with a video
 
         Args:
@@ -378,8 +368,10 @@ class SlidingWindow():
         if not self.debug:
             return print('Debug mode deactivated, passing...')
         
-        if not self.loaded:
-            return False
+        error = self.load_config(config_path)
+        if error:
+            print(error)
+            return 
 
         calib = cal.Calibration(debug=False)
 
@@ -438,7 +430,7 @@ if __name__ == '__main__':
     videoHarder = "img/Udacity/challenge_video.mp4"
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
 
-    slide_win = SlidingWindow("./config/video.json", debug=True)
-    slide_win.debug_video(video)
-    slide_win.debug_video(videoHarder)
-    slide_win.debug_video(videoHardest)
+    slide_win = SlidingWindow(debug=True)
+    slide_win.debug_video(video, "./config/video.json")
+    # slide_win.debug_video(videoHarder)
+    # slide_win.debug_video(videoHardest)
