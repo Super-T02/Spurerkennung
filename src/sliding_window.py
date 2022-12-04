@@ -1,11 +1,11 @@
 import cv2 as cv
 from matplotlib import pyplot as plt
 import numpy as np
-import os
 import time
 
 import calib as cal
 import perspective_transform as per
+import preprocess as pre
 
 class SlidingWindow():
     
@@ -17,48 +17,50 @@ class SlidingWindow():
     LANE_WIDTH_FOR_SEARCH = 10
     SCALING_OF_BOX_WIDTH = 5
 
-    def __init__(self, thresh = None, debug = False, debug_plots = False) -> None:
-        self.per_tran = per.Transformation(True)
+
+    def __init__(self, thresh = THRESH, n_windows = N_WINDOWS, margin = MARGIN, min_pix = MIN_PIX, lane_width_for_search = LANE_WIDTH_FOR_SEARCH,
+                 scaling_of_box_width = SCALING_OF_BOX_WIDTH, debug = False, debug_plots = False) -> None:
+        """Constructor for the SlidingWindow class
+
+        Args:
+            thresh (tuple, optional): Threshold for preprocessing . Defaults to THRESH.
+            n_windows (int, optional): Number of sliding windows. Defaults to N_WINDOWS.
+            margin (int, optional): margin of the sliding window. Defaults to MARGIN.
+            min_pix (int, optional): Minimal number of pixels to
+            detect a line. Defaults to MIN_PIX.
+            lane_width_for_search (int, optional): Margin for
+            searching a line in the frame. Defaults to LANE_WIDTH_FOR_SEARCH.
+            scaling_of_box_width (int, optional): Scale of the next window. Defaults to SCALING_OF_BOX_WIDTH.
+            debug (bool, optional): Debug mode. Defaults to False.
+            debug_plots (bool, optional): Debug mode with plot of histogram. Defaults to False.
+        """
+        
+        self.transformation = per.Transformation(debug)
+        self.pre = pre.Preprocess()
         self.debug = debug
         self.debug_plots = debug_plots
+        
+        # Remember last frames and draw information
         self.last_draw_info = None
         self.last_frame_right_x = None
         self.last_frame_left_x = None
-        self.thresh = thresh if thresh else self.THRESH
+        
+        # Configuration
+        self.thresh = thresh
+        self.n_windows = n_windows
+        self.margin = margin
+        self.min_pix = min_pix
+        self. land_width_for_search = lane_width_for_search
+        self.scaling_of_box_width = scaling_of_box_width
 
 
-    def _preprocess(self, img):
-        img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
-        img = cv.GaussianBlur(img, (5,5), 0)
-        img_transformed, M_reversed = self.per_tran.transform_image_perspective(img)
-        img_transformed = cv.threshold(img_transformed, self.thresh[0], self.thresh[1], cv.THRESH_BINARY)[1]
-
-        return img_transformed, M_reversed
-
-
-    def get_histogram(self, img):
-        # Get the histogram of the image
-        histogram = np.sum(img[img.shape[0]//2:,:], axis=0)
-
-        # Show the histogram in debug mode
-        if self.debug_plots:
-            plt.figure()
-            plt.plot(histogram)
-            plt.show()
-
-        return histogram
-
-    
     def execute(self, img):
         # Preprocess the image
         img_transformed, M_reverse = self._preprocess(img)
 
-#TODO: make mask for image, see def _segmentation(self, img): (main)
-#                               def _getVerticesROI(self, img): (main)
-
-
         if self.debug:
-            cv.imshow('transformed', img_transformed)            
+            cv.imshow('transformed', img_transformed)
+                
         # Set local vars
         hist = self.get_histogram(img_transformed)
         img_y_shape = img_transformed.shape[0]
@@ -66,7 +68,7 @@ class SlidingWindow():
         self.set_context(img_transformed, hist)
 
         # Generate the windows
-        for i_window in range(self.N_WINDOWS):
+        for i_window in range(self.n_windows):
             self._generate_window(img_y_shape, i_window)
 
         # Get the drawing information
@@ -89,8 +91,58 @@ class SlidingWindow():
         return img
 
 
+    def _preprocess(self, img):
+        """Preprocess the image, apply filters and transformations
+
+        Args:
+            img (Image): Current Frame
+
+        Returns:
+            Tuple: Transformed image and the reversed transformation matrix
+        """
+        # Convert to grayscale
+        img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
+        
+        # Apply gaussian blur
+        img = self.pre.gauss(img)
+        
+        # Threshold the image to areal view
+        img_transformed, M_reversed = self.transformation.transform_image_perspective(img)
+        
+        # Apply threshold
+        img_transformed = self.pre.threshold(img_transformed, self.thresh)
+
+        return img_transformed, M_reversed
+
+
+    def get_histogram(self, img):
+        """Generate the histogram of the transformed image
+
+        Args:
+            img (Image): Current Frame
+
+        Returns:
+            List: Histogram of the image
+        """
+        # Get the histogram of the image
+        histogram = np.sum(img[img.shape[0]//2:,:], axis=0)
+
+        # Show the histogram in debug mode
+        if self.debug_plots:
+            plt.figure()
+            plt.plot(histogram)
+            plt.show()
+
+        return histogram
+    
 
     def set_context(self, img, hist):
+        """Generate the search context for the windows (based on the previous frame)
+
+        Args:
+            img (Image): Current Frame
+            hist (List): Histogram of the current frame
+        """
         # Generate black layered image
         if self.debug: self.debug_img = np.dstack((img, img, img)) * 255
         mid = img.shape[1]//2
@@ -99,8 +151,8 @@ class SlidingWindow():
             # Divide the histogram into to parts
             leftx_base = np.argmax(hist[:mid])
         else:
-            left_negative = self.last_frame_left_x - self.LANE_WIDTH_FOR_SEARCH
-            left_positive = self.last_frame_left_x + self.LANE_WIDTH_FOR_SEARCH
+            left_negative = self.last_frame_left_x - self.land_width_for_search
+            left_positive = self.last_frame_left_x + self.land_width_for_search
             if left_negative < 1:
                 left_negative = 1
                 left_positive = mid
@@ -111,8 +163,8 @@ class SlidingWindow():
             # Divide the histogram into to parts
             rightx_base = np.argmax(hist[mid:]) + mid
         else:
-            right_negative = self.last_frame_right_x - self.LANE_WIDTH_FOR_SEARCH
-            right_positive = self.last_frame_right_x + self.LANE_WIDTH_FOR_SEARCH
+            right_negative = self.last_frame_right_x - self.land_width_for_search
+            right_positive = self.last_frame_right_x + self.land_width_for_search
             if right_positive > img.shape[1] - 1:
                 right_negative = mid
                 right_positive = img.shape[1] - 1 
@@ -121,8 +173,8 @@ class SlidingWindow():
 
 
         # Number of sliding windows in the frame
-        self._N_WINDOW = 10
-        self.window_height = img.shape[0]//self._N_WINDOW
+        # self.n_windows = 10
+        self.window_height = img.shape[0]//self.n_windows
 
         # Find coordinates which are not zero
         nonzero = img.nonzero()
@@ -137,15 +189,21 @@ class SlidingWindow():
 
 
     def _generate_window(self, img_y_shape, index):
+        """Generate the window for the current index
+
+        Args:
+            img_y_shape (int): y shape of the image
+            index (int): index of the current window
+        """
         # Set current window coordinates
         win_y_low = img_y_shape - (index + 1) * self.window_height
         win_y_high = img_y_shape - index * self.window_height
         
         # Define box-window coordinates
-        win_xleft_low = self.current_leftx - (self.MARGIN + index * self.SCALING_OF_BOX_WIDTH)
-        win_xleft_high = self.current_leftx + (self.MARGIN + index * self.SCALING_OF_BOX_WIDTH)
-        win_xright_low = self.current_rightx - (self.MARGIN + index * self.SCALING_OF_BOX_WIDTH)
-        win_xright_high = self.current_rightx + (self.MARGIN + index * self.SCALING_OF_BOX_WIDTH)
+        win_xleft_low = self.current_leftx - (self.margin + index * self.scaling_of_box_width)
+        win_xleft_high = self.current_leftx + (self.margin + index * self.scaling_of_box_width)
+        win_xright_low = self.current_rightx - (self.margin + index * self.scaling_of_box_width)
+        win_xright_high = self.current_rightx + (self.margin + index * self.scaling_of_box_width)
 
         # Define rectangle
         if self.debug:
@@ -164,22 +222,31 @@ class SlidingWindow():
         self.right_lane_inds.append(right_inds)
 
         # Change the current indices
-        if len(left_inds) > self.MIN_PIX:
+        if len(left_inds) > self.min_pix:
             self.current_leftx = int(np.mean(self.nonzerox[left_inds]))
             if index == 0:
                 self.last_frame_left_x = self.current_leftx
-        if len(right_inds) > self.MIN_PIX:
+        if len(right_inds) > self.min_pix:
             self.current_rightx = int(np.mean(self.nonzerox[right_inds]))
             if index == 0:
                 self.last_frame_right_x = self.current_rightx
 
         # Save x coordinate of first window from this frame for next frame to search here for lane (doesn't jump around)
-        # if index == self.N_WINDOWS - 1:
+        # if index == self.n_windows - 1:
         #     self.last_frame_left_x = self.current_leftx
         #     self.last_frame_right_x = self.current_rightx
 
 
     def _generate_line_coordinates(self, img_y_shape, img_x_shape):
+        """Generate the line coordinates for the left and right lane
+
+        Args:
+            img_y_shape (int): shape of the image in y direction
+            img_x_shape (int): shape of the image in x direction
+
+        Returns:
+            Dict: Dictionary with the left and right lane coordinates
+        """
         # Flatten array
         self.left_lane_inds = np.concatenate(self.left_lane_inds)
         self.right_lane_inds = np.concatenate(self.right_lane_inds)
@@ -218,7 +285,7 @@ class SlidingWindow():
             cv.imshow('Sliding Window', self.debug_img)
 
         # Prepare return values
-        ret = {
+        return {
             'LEFT_X': leftx,
             'RIGHT_X': rightx,
             'LEFT_FIT_X': left_fit_x,
@@ -226,12 +293,19 @@ class SlidingWindow():
             'PLOT_Y': plot_y
         }
 
-        return ret
-
     def _draw_lane_area(self, original_img, transformed_img, M_reversed, draw_info):
+        """Draw the lane area on the original image
+
+        Args:
+            original_img (Image): original image
+            transformed_img (Image): transformed image
+            M_reversed (List): reversed transformation matrix
+            draw_info (Dict): dictionary with the coordinates of the lane
+
+        Returns:
+            Image: image with the lane area
+        """
         # Unpack draw Info
-        left_x = draw_info['LEFT_X']
-        right_x = draw_info['RIGHT_X']
         left_fit_x = draw_info['LEFT_FIT_X']
         right_fit_x = draw_info['RIGHT_FIT_X']
         plot_y = draw_info['PLOT_Y']
@@ -257,6 +331,15 @@ class SlidingWindow():
         return result
 
     def debug_video(self, path):
+        """Debug the module with a video
+
+        Args:
+            path (String): path to the video
+
+        Returns:
+            String: Error message
+        """
+        
         if not self.debug:
             return print('Debug mode deactivated, passing...')
 
@@ -281,7 +364,6 @@ class SlidingWindow():
             # Do here the image processing
             frame = cv.resize(frame, (win_x, win_y))
             frame = calib.equalize(frame)
-            equalized = frame
 
             # Test of the module
             frame = self.execute(frame)
@@ -316,7 +398,7 @@ if __name__ == '__main__':
     videoHarder = "img/Udacity/challenge_video.mp4"
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
 
-    slide_win = SlidingWindow((140,255), True)
+    slide_win = SlidingWindow((140,255), debug=True)
     slide_win.debug_video(video)
     slide_win.debug_video(videoHarder)
     slide_win.debug_video(videoHardest)

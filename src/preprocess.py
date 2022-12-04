@@ -1,11 +1,5 @@
 import cv2 as cv
-from matplotlib import pyplot as plt
 import numpy as np
-import os
-import time
-
-import calib as cal
-import perspective_transform as per
 
 class Preprocess():
 
@@ -19,7 +13,11 @@ class Preprocess():
 
     def canny(self, img, canny_lower, canny_upper):
         return cv.Canny(img, canny_lower, canny_upper)
+    
+    def threshold(self, img, thresh):
+        return cv.threshold(img, thresh[0], thresh[1], cv.THRESH_BINARY)[1]
 
+    
     def segmentation(self, img, roi):
         # Define a blank matrix that matches the image height/width.
         mask = np.zeros_like(img)
@@ -47,3 +45,4 @@ class Preprocess():
         ]
 
         return roi
+    
