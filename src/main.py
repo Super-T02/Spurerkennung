@@ -16,7 +16,7 @@ class Main():
                 
         # Define the objects
         self.calib = cal.Calibration(debug=debug)
-        self.sliding_win = slw.SlidingWindow()
+        self.sliding_win = slw.SlidingWindow(config_path, debug=debug)
         self.hough = hou.HoughTransformation(config_path, debug = debug)
         
         # Define the variables
@@ -123,6 +123,7 @@ if __name__ == '__main__':
 
     # main.startVideo()
     main.startVideo(mode=0)
+    main.startVideo(mode=1)
     # main.startVideo(hough=True, show_areal=True)
     # main.startVideo(hough=True)
     # main1.startVideo()

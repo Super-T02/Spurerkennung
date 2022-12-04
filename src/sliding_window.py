@@ -2,6 +2,7 @@ import cv2 as cv
 from matplotlib import pyplot as plt
 import numpy as np
 import time
+import json
 
 import calib as cal
 import perspective_transform as per
@@ -9,17 +10,7 @@ import preprocess as pre
 
 class SlidingWindow():
     
-    # Configuration
-    N_WINDOWS = 10
-    MARGIN = 80
-    MIN_PIX = 20
-    THRESH = (140, 255)
-    LANE_WIDTH_FOR_SEARCH = 10
-    SCALING_OF_BOX_WIDTH = 5
-
-
-    def __init__(self, thresh = THRESH, n_windows = N_WINDOWS, margin = MARGIN, min_pix = MIN_PIX, lane_width_for_search = LANE_WIDTH_FOR_SEARCH,
-                 scaling_of_box_width = SCALING_OF_BOX_WIDTH, debug = False, debug_plots = False) -> None:
+    def __init__(self, config_path, debug = False, debug_plots = False) -> None:
         """Constructor for the SlidingWindow class
 
         Args:
@@ -39,20 +30,52 @@ class SlidingWindow():
         self.pre = pre.Preprocess()
         self.debug = debug
         self.debug_plots = debug_plots
+        self.loaded = False
+        
+        error = self._load_config(config_path)
+        if error:
+            print(error)
+            return 
+        
+        self.loaded = True
         
         # Remember last frames and draw information
         self.last_draw_info = None
         self.last_frame_right_x = None
         self.last_frame_left_x = None
+    
         
-        # Configuration
-        self.thresh = thresh
-        self.n_windows = n_windows
-        self.margin = margin
-        self.min_pix = min_pix
-        self. land_width_for_search = lane_width_for_search
-        self.scaling_of_box_width = scaling_of_box_width
-
+    def _load_config(self, path):
+        
+        with open(path, 'r') as f:
+            config = json.load(f)
+        
+        if not config:
+            return 'Error: Config not found'
+        if not 'SLIDING_WINDOWS' in config.keys():
+            return 'Error: SLIDING_WINDOWS is missing'
+        if not 'N_WINDOWS' in config['SLIDING_WINDOWS'].keys():
+            return 'Error: N_WINDOWS is missing'
+        if not 'MARGIN' in config['SLIDING_WINDOWS'].keys():
+            return 'Error: MARGIN is missing'
+        if not 'MIN_PIX' in config['SLIDING_WINDOWS'].keys():
+            return 'Error: MIN_PIX is missing'
+        if not 'THRESH' in config['SLIDING_WINDOWS'].keys():
+            return 'Error: THRESH is missing'
+        if not 'LANE_WIDTH_FOR_SEARCH' in config['SLIDING_WINDOWS'].keys():
+            return 'Error: LANE_WIDTH_FOR_SEARCH is missing'
+        if not 'SCALING_OF_BOX_WIDTH' in config['SLIDING_WINDOWS'].keys():
+            return 'Error: SCALING_OF_BOX_WIDTH is missing'
+        
+        self.n_windows = config['SLIDING_WINDOWS']['N_WINDOWS']
+        self.margin = config['SLIDING_WINDOWS']['MARGIN']
+        self.min_pix = config['SLIDING_WINDOWS']['MIN_PIX']
+        self.thresh = config['SLIDING_WINDOWS']['THRESH']
+        self.land_width_for_search = config['SLIDING_WINDOWS']['LANE_WIDTH_FOR_SEARCH']
+        self.scaling_of_box_width = config['SLIDING_WINDOWS']['SCALING_OF_BOX_WIDTH']
+        
+        return None
+        
 
     def execute(self, img):
         """Execute the sliding window algorithm
@@ -63,11 +86,15 @@ class SlidingWindow():
         Returns:
             Image: Processed frame
         """
+        if not self.loaded:
+            return False
+        
         # Preprocess the image
         img_transformed, M_reverse = self._preprocess(img)
 
         if self.debug:
             cv.imshow('transformed', img_transformed)
+            
                 
         # Set local vars
         hist = self.get_histogram(img_transformed)
@@ -350,6 +377,9 @@ class SlidingWindow():
         
         if not self.debug:
             return print('Debug mode deactivated, passing...')
+        
+        if not self.loaded:
+            return False
 
         calib = cal.Calibration(debug=False)
 
@@ -375,6 +405,8 @@ class SlidingWindow():
 
             # Test of the module
             frame = self.execute(frame)
+            if (type(frame) == bool and not frame) or not frame.any():
+                return print('Error: Module not loaded')
 
             # Do operations on the frame
             font = cv.FONT_HERSHEY_SIMPLEX
@@ -406,7 +438,7 @@ if __name__ == '__main__':
     videoHarder = "img/Udacity/challenge_video.mp4"
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
 
-    slide_win = SlidingWindow((140,255), debug=True)
+    slide_win = SlidingWindow("./config/video.json", debug=True)
     slide_win.debug_video(video)
     slide_win.debug_video(videoHarder)
     slide_win.debug_video(videoHardest)

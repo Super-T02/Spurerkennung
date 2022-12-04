@@ -15,5 +15,13 @@
             [78, 72],
             [-150, -75]
         ]
+    },
+    "SLIDING_WINDOWS": {
+        "N_WINDOWS": 10,
+        "MARGIN": 80,
+        "MIN_PIX": 20,
+        "THRESH": [140, 250],
+        "LANE_WIDTH_FOR_SEARCH": 10,
+        "SCALING_OF_BOX_WIDTH": 5
     }
 }

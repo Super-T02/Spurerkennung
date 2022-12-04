@@ -7,21 +7,6 @@ import calib as cal
 import preprocess as pre
 
 class HoughTransformation():
-    # Hough Settings
-    RHO = 6
-    THETA = 90
-    THRESHOLD = 100
-    MIN_LINE_LENGTH = 3
-    MAX_LINE_GAP = 2
-
-
-    # Canny settings
-    CANNY_LOWER = 100
-    CANNY_UPPER = 150
-
-    # FIX Point Hough
-    LEFT_FIX = (200, 720)
-    RIGHT_FIX = (1200, 720)
 
     def __init__(self, config_path, debug = False) -> None:
         """Constructor of the class HoughTransformation
@@ -40,22 +25,6 @@ class HoughTransformation():
             return 
         
         self.loaded = True
-        
-        # # Preprocess
-        # self.canny_lower = canny_lower
-        # self.canny_upper = canny_upper
-        # self.roi = roi
-
-        # # Hough
-        # self.rho = rho
-        # self.theta = theta
-        # self.threshold = threshold
-        # self.min_line_length = min_line_length
-        # self.max_line_gap = max_line_gap
-
-        # # Point Hough
-        # self.left_fix = left_fix
-        # self.right_fix = right_fix
         
     def _load_config(self, path):
         
@@ -411,12 +380,6 @@ class HoughTransformation():
     
 if __name__ == '__main__':
     video = "img/Udacity/project_video.mp4"
-    roi_video = [
-            (300, - 75), # BOTTOM LEFT
-            (-55, 72), # TOP LEFT
-            (78, 72), # TOP RIGHT
-            (-150, - 75), # BOTTOM RIGHT
-    ]
     videoHarder = "img/Udacity/challenge_video.mp4"
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
 
