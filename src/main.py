@@ -116,6 +116,7 @@ if __name__ == '__main__':
     # Start the program
     main = Main(video, debug=False)
     main2 = Main(videoHarder, debug=False)
+    main3 = Main(videoHardest, debug=False)
 
     # Mode:
     # - 0: Hough
@@ -123,5 +124,7 @@ if __name__ == '__main__':
     main.startVideo(mode=0, config_path="./config/video.json")
     main.startVideo(mode=1, config_path="./config/video.json")
     main2.startVideo(mode=0, config_path="./config/video_challenge.json")
-    # main2.startVideo(mode=1, config_path="./config/video_challenge.json")
+    main2.startVideo(mode=1, config_path="./config/video_challenge.json")
+    # main3.startVideo(mode=1, config_path="./config/video_challenge.json")
+    # main3.startVideo(mode=0, config_path="./config/video_challenge.json")
     
