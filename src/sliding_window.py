@@ -13,7 +13,7 @@ class SlidingWindow():
     N_WINDOWS = 10
     MARGIN = 80
     MIN_PIX = 20
-    THRESH = (130, 255)
+    THRESH = (140, 255)
     LANE_WIDTH_FOR_SEARCH = 10
     SCALING_OF_BOX_WIDTH = 5
 
@@ -55,6 +55,14 @@ class SlidingWindow():
 
 
     def execute(self, img):
+        """Execute the sliding window algorithm
+
+        Args:
+            img (Image): Current frame
+
+        Returns:
+            Image: Processed frame
+        """
         # Preprocess the image
         img_transformed, M_reverse = self._preprocess(img)
 
