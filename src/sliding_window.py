@@ -49,7 +49,7 @@ class SlidingWindow():
         return histogram
 
     
-    def apply_sliding_window(self, img):
+    def execute(self, img):
         # Preprocess the image
         img_transformed, M_reverse = self._preprocess(img)
 
@@ -284,7 +284,7 @@ class SlidingWindow():
             equalized = frame
 
             # Test of the module
-            frame = self.apply_sliding_window(frame)
+            frame = self.execute(frame)
 
             # Do operations on the frame
             font = cv.FONT_HERSHEY_SIMPLEX
