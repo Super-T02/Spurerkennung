@@ -54,6 +54,10 @@ class SlidingWindow():
             return 'Error: LANE_WIDTH_FOR_SEARCH is missing'
         if not 'SCALING_OF_BOX_WIDTH' in config['SLIDING_WINDOWS'].keys():
             return 'Error: SCALING_OF_BOX_WIDTH is missing'
+        if not 'MIN_COLOR' in config['SLIDING_WINDOWS'].keys():
+            return 'Error: MIN_COLOR is missing'
+        if not 'MAX_COLOR' in config['SLIDING_WINDOWS'].keys():
+            return 'Error: MAX_COLOR is missing'
         
         self.n_windows = config['SLIDING_WINDOWS']['N_WINDOWS']
         self.margin = config['SLIDING_WINDOWS']['MARGIN']
@@ -61,6 +65,8 @@ class SlidingWindow():
         self.thresh = config['SLIDING_WINDOWS']['THRESH']
         self.land_width_for_search = config['SLIDING_WINDOWS']['LANE_WIDTH_FOR_SEARCH']
         self.scaling_of_box_width = config['SLIDING_WINDOWS']['SCALING_OF_BOX_WIDTH']
+        self._min_color = config['SLIDING_WINDOWS']['MIN_COLOR']
+        self._max_color = config['SLIDING_WINDOWS']['MAX_COLOR']
         
         self.loaded = True
         
@@ -125,6 +131,12 @@ class SlidingWindow():
         Returns:
             Tuple: Transformed image and the reversed transformation matrix
         """
+        # Find the yellow line
+        if self._min_color and self._max_color:
+            img = self.pre.map_color(img, self._min_color, self._max_color)
+            if self.debug:
+                cv.imshow('yellow', img)
+        
         # Convert to grayscale
         img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
         

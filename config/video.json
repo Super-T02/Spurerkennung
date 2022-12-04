@@ -20,8 +20,10 @@
         "N_WINDOWS": 10,
         "MARGIN": 80,
         "MIN_PIX": 20,
-        "THRESH": [140, 250],
+        "THRESH": [180, 255],
         "LANE_WIDTH_FOR_SEARCH": 10,
-        "SCALING_OF_BOX_WIDTH": 5
+        "SCALING_OF_BOX_WIDTH": 5,
+        "MIN_COLOR": [20, 35, 140],
+        "MAX_COLOR": [70, 255, 255]
     }
 }

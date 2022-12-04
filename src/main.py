@@ -104,43 +104,21 @@ class Main():
 if __name__ == '__main__':
     # Path to video
     video = "img/Udacity/project_video.mp4"
-    roi_video = [
-            (300, - 75), # BOTTOM LEFT
-            (-55, 72), # TOP LEFT
-            (78, 72), # TOP RIGHT
-            (-150, - 75), # BOTTOM RIGHT
-    ]
     videoHarder = "img/Udacity/challenge_video.mp4"
-    roi_videoHarder = [
-            (300, - 75),
-            (-40, 90),
-            (50, 80),
-            (-325, - 75),
-    ]
+    # roi_videoHarder = [
+    #         (300, - 75),
+    #         (-40, 90),
+    #         (50, 80),
+    #         (-325, - 75),
+    # ]
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
-    roi_videoHardest = [
-            (300, - 75),
-            (-60, 75),
-            (40, 75),
-            (150, - 75),
-    ]
     
     # Start the program
-    main = Main(video, debug=False) # canny_lower=50, canny_upper=100 if you change the order of areal view preprocessing 
-    # main1 = Main(videoHarder, roi_videoHarder, canny_lower=15, canny_upper=100, debug=True)
-    # main2 = Main(videoHardest, roi_videoHardest)
+    main = Main(video, debug=False)
 
     # Mode:
     # - 0: Hough
     # - 1: Sliding window
-
-    # main.startVideo()
     main.startVideo(mode=0, config_path="./config/video.json")
     main.startVideo(mode=1, config_path="./config/video.json")
-    # main.startVideo(hough=True, show_areal=True)
-    # main.startVideo(hough=True)
-    # main1.startVideo()
-    # main1.startVideo(hough=True)
-    # main2.startVideo()
-    # main2.startVideo(hough=True)
     

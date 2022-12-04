@@ -46,3 +46,19 @@ class Preprocess():
 
         return roi
     
+    def map_color(self, img, lower, upper):
+        hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
+        
+        # Threshold of the color in HSV space
+        lower = np.array(lower)
+        upper = np.array(upper)
+        
+        # preparing the mask to overlay
+        mask = cv.inRange(hsv, lower, upper)
+        
+        # The black region in the mask has the value of 0,
+        # so when multiplied with original image removes all non-blue regions
+        result = cv.bitwise_and(img, img, mask = mask)
+        result = self.threshold(result, (1, 255))
+        result = cv.bitwise_or(img, result)
+        return result
