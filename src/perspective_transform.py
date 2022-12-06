@@ -10,29 +10,9 @@ class Transformation():
     def __init__(self, debug = False) -> None:
         self.debug = debug
 
-    def _get_transformation_coordinates(self, height, width):
-        #first x coordinate, then y (yes confusing)
-        src_top_left = [595, 384]
-        src_top_right = [635, 384]
-        src_bot_left = [320, 579]
-        src_bot_right = [964, 579]
-
-        src = [src_top_left, src_top_right, src_bot_left, src_bot_right]
-
-        dst_top_left = [300,0]
-        dst_top_right = [980,0]
-        dst_bot_left = [350,620]
-        dst_bot_right = [980,620]
-        dst = [dst_top_left, dst_top_right, dst_bot_left, dst_bot_right]
-
-        return src, dst
-
-
-    def _calculate_matrix(self, img):
-        height = len(img) -1
-        width = len(img[0]) -1
-
-        src_coor, dst_coor = self._get_transformation_coordinates(height, width)
+    def _calculate_matrix(self, img, trans_matrix):
+        src_coor = trans_matrix['SRC']
+        dst_coor = trans_matrix['DST']
         src = np.float32([src_coor[0], src_coor[1], src_coor[2], src_coor[3]]) 
         dst = np.float32([dst_coor[0], dst_coor[1], dst_coor[2], dst_coor[3]])
 
@@ -41,8 +21,8 @@ class Transformation():
         return M, M_reversed
 
 
-    def transform_image_perspective(self, img):
-        M, M_reversed = self._calculate_matrix(img)
+    def transform_image_perspective(self, img, trans_matrix):
+        M, M_reversed = self._calculate_matrix(img, trans_matrix)
 
         img_transformed = cv.warpPerspective(img,M,(img.shape[1], img.shape[0]),flags=cv.INTER_LINEAR) #TODO: possibly change this flag in future versions, maybe: INTER_NEAREST
 

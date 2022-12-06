@@ -1,0 +1,54 @@
+{
+    "HOUGH": {
+        "RHO": 6,
+        "THETA": 40,
+        "THRESHOLD": 50,
+        "MIN_LINE_LENGTH": 0.5,
+        "MAX_LINE_GAP": 5,
+        "CANNY_LOWER": 10,
+        "CANNY_UPPER": 90,
+        "LEFT_FIX": [150, 720],
+        "RIGHT_FIX": [1100, 720],
+        "BORDER_LEFT": 580,
+        "BORDER_RIGHT": 650,
+        "POLY_HEIGHT": 410,
+        "MIN_COLOR": [20, 35, 140],
+        "MAX_COLOR": [70, 255, 255],
+        "ROI": [
+            [300, -75],
+            [10, 90],
+            [60, 80],
+            [-270, -75]
+        ],
+        "ROI2": [
+            [450, -75],
+            [50, 72],
+            [50, 72],
+            [-400, -75]
+        ]
+    },
+    "SLIDING_WINDOWS": {
+        "N_WINDOWS": 20,
+        "MARGIN": 25,
+        "MIN_PIX": 10,
+        "THRESH": [180, 255],
+        "LANE_WIDTH_FOR_SEARCH": 10,
+        "SCALING_OF_BOX_WIDTH": 5,
+        "MIN_COLOR": [20, 17, 170],
+        "MAX_COLOR": [50, 150, 250],
+        "TRANS_MATRIX": {
+            "SRC": [
+                [595, 416],
+                [680, 416],
+                [320, 579],
+                [964, 579]
+            ],
+            "DST": [
+                [300,0],
+                [980,0],
+                [350,620],
+                [980,620]         
+            ]
+        }
+    }
+}
