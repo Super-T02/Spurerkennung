@@ -60,6 +60,14 @@ class SlidingWindow():
             return 'Error: MAX_COLOR is missing'
         if not 'TRANS_MATRIX' in config['SLIDING_WINDOWS'].keys():
             return 'Error: TRANS_MATRIX is missing'
+        if not 'HIT_X_LEFT' in config['SLIDING_WINDOWS'].keys():
+            return 'Error: HIT_X_LEFT is missing'
+        if not 'HIT_Y_LEFT' in config['SLIDING_WINDOWS'].keys():
+            return 'Error: HIT_Y_LEFT is missing'
+        if not 'HIT_X_RIGHT' in config['SLIDING_WINDOWS'].keys():
+            return 'Error: HIT_X_RIGHT is missing'
+        if not 'HIT_Y_RIGHT' in config['SLIDING_WINDOWS'].keys():
+            return 'Error: HIT_Y_RIGHT is missing'
         
         self.n_windows = config['SLIDING_WINDOWS']['N_WINDOWS']
         self.margin = config['SLIDING_WINDOWS']['MARGIN']
@@ -70,6 +78,10 @@ class SlidingWindow():
         self._min_color = config['SLIDING_WINDOWS']['MIN_COLOR']
         self._max_color = config['SLIDING_WINDOWS']['MAX_COLOR']
         self.trans_matrix = config['SLIDING_WINDOWS']['TRANS_MATRIX']
+        self._hit_x_left = config['SLIDING_WINDOWS']['HIT_X_LEFT']
+        self._hit_y_left = config['SLIDING_WINDOWS']['HIT_Y_LEFT']
+        self._hit_x_right = config['SLIDING_WINDOWS']['HIT_X_RIGHT']
+        self._hit_y_right = config['SLIDING_WINDOWS']['HIT_Y_RIGHT']
         
         self.loaded = True
         
@@ -119,11 +131,29 @@ class SlidingWindow():
             self.last_draw_info = draw_info
 
         # Draw the line
-        img = self._draw_lane_area(img, img_transformed, M_reverse, draw_info)
+        if self.check_plausibility(draw_info, img.shape): img = self._draw_lane_area(img, img_transformed, M_reverse, draw_info)
 
         # Return finished frame
         return img
 
+    def check_plausibility(self, draw_info, img_shape) -> bool:
+        y_values = draw_info['PLOT_Y']
+        left_fit_x = draw_info['LEFT_FIT_X']
+        right_fit_x = draw_info['RIGHT_FIT_X']
+        
+        # Check for the hit boxes
+        if any(left_fit_x[self._hit_y_left:] <= self._hit_x_left):
+            return False
+        
+        if any(right_fit_x[self._hit_y_right:] >= img_shape[1] + self._hit_x_right):
+            return False
+        
+        # Check for crossing lines
+        if any(left_fit_x >= right_fit_x):
+            return False
+        
+        return True
+        
 
     def _preprocess(self, img):
         """Preprocess the image, apply filters and transformations
@@ -447,6 +477,6 @@ if __name__ == '__main__':
 
     slide_win = SlidingWindow(debug=True)
     slide_win.debug_video(video, "./config/video.json")
-    # slide_win.debug_video(videoHarder, "./config/video_challenge.json")
+    slide_win.debug_video(videoHarder, "./config/video_challenge.json")
     # slide_win.debug_video(videoHarder)
     # slide_win.debug_video(videoHardest)
