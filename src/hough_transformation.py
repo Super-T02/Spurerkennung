@@ -61,6 +61,20 @@ class HoughTransformation():
             return 'Error: MIN_COLOR is missing'
         if not 'MAX_COLOR' in config['HOUGH'].keys():
             return 'Error: MAX_COLOR is missing'
+        if not 'HIT_X_LEFT' in config['HOUGH'].keys():
+            return 'Error: HIT_X_LEFT is missing'
+        if not 'HIT_Y_LEFT' in config['HOUGH'].keys():
+            return 'Error: HIT_Y_LEFT is missing'
+        if not 'HIT_X_RIGHT' in config['HOUGH'].keys():
+            return 'Error: HIT_X_RIGHT is missing'
+        if not 'HIT_Y_RIGHT' in config['HOUGH'].keys():
+            return 'Error: HIT_Y_RIGHT is missing'
+        if not 'HIT_X_MIDDLE_LEFT' in config['HOUGH'].keys():
+            return 'Error: HIT_X_MIDDLE_LEFT is missing'
+        if not 'HIT_X_MIDDLE_RIGHT' in config['HOUGH'].keys():
+            return 'Error: HIT_X_MIDDLE_RIGHT is missing'
+        if not 'HIT_Y_MIDDLE' in config['HOUGH'].keys():
+            return 'Error: HIT_Y_MIDDLE is missing'
         
         self.canny_lower = config['HOUGH']['CANNY_LOWER']
         self.canny_upper = config['HOUGH']['CANNY_UPPER']
@@ -78,6 +92,13 @@ class HoughTransformation():
         self.poly_height = config['HOUGH']['POLY_HEIGHT']
         self._min_color = config['HOUGH']['MIN_COLOR']
         self._max_color = config['HOUGH']['MAX_COLOR']
+        self._hit_x_left = config['HOUGH']['HIT_X_LEFT']
+        self._hit_y_left = config['HOUGH']['HIT_Y_LEFT']
+        self._hit_x_right = config['HOUGH']['HIT_X_RIGHT']
+        self._hit_y_right = config['HOUGH']['HIT_Y_RIGHT']
+        self._hit_x_middle_left = config['HOUGH']['HIT_X_MIDDLE_LEFT']
+        self._hit_x_middle_right = config['HOUGH']['HIT_X_MIDDLE_RIGHT']
+        self._hit_y_middle = config['HOUGH']['HIT_Y_MIDDLE']
         
         
         self.loaded = True
@@ -124,13 +145,35 @@ class HoughTransformation():
         if len(right_x) > 0 and len(right_y) > 0:
             right_line = self._get_polyLine_points(img, right_x , right_y, self.right_fix, self.border_right)
         
-        if left_line:
+        # Check for crossing lines
+        if left_line and right_line and any(left_line['FIT_X'] >= right_line['FIT_X']):
+            return img
+        
+        if not left_line and not right_line:
+            return img
+        
+        if left_line and self.check_plausibility(left_line, img.shape):
             processed_img = self._draw_poly_line_hugh(img, left_line, (255,0,0))
-        if right_line:
+        if right_line and self.check_plausibility(right_line, img.shape):
             processed_img = self._draw_poly_line_hugh(img, right_line)
             
         return processed_img
 
+    def check_plausibility(self, draw_info, img_shape) -> bool:
+        y_values = draw_info['PLOT_Y']
+        fit_x = draw_info['FIT_X']
+        
+        # Check for the hit boxes
+        if any(fit_x[self._hit_y_left:] <= self._hit_x_left):
+            return False
+            
+        if any(fit_x[self._hit_y_right:] >= img_shape[1] + self._hit_x_right):
+            return False
+        
+        if any(fit_x[img_shape[0] + self._hit_y_middle:] >= self._hit_x_middle_left) and any(fit_x[img_shape[0] + self._hit_y_middle:] <= img_shape[1] + self._hit_x_middle_right):
+            return False
+        
+        return True
 
     def debug_video(self, path, config_path):
         """Video for debugging the video itself
@@ -413,7 +456,7 @@ if __name__ == '__main__':
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
 
     hough_transform = HoughTransformation(debug=True)
-    # hough_transform.debug_video(video, "./config/video.json")
+    hough_transform.debug_video(video, "./config/video.json")
     hough_transform.debug_video(videoHarder, "./config/video_challenge.json")
     # hough_transform.debug_video(videoHarder)
     # hough_transform.debug_video(videoHardest)

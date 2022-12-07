@@ -14,6 +14,13 @@
         "POLY_HEIGHT": 410,
         "MIN_COLOR": [20, 35, 140],
         "MAX_COLOR": [70, 255, 255],
+        "HIT_X_LEFT": 200,
+        "HIT_Y_LEFT": 400,
+        "HIT_X_RIGHT": -150,
+        "HIT_Y_RIGHT": 400,
+        "HIT_X_MIDDLE_LEFT": 450,
+        "HIT_X_MIDDLE_RIGHT": -400,
+        "HIT_Y_MIDDLE": -75,
         "ROI": [
             [300, -75],
             [10, 90],
