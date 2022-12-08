@@ -51,7 +51,7 @@ class Main():
             vid_str = 'default_vid'
             if mode == 1:
                 mode_str = 'sliding_windows'
-            if self.path == './config/video_challenge.json':
+            if config_path == './config/video_challenge.json':
                 vid_str = 'challenge_vid'
             filename = saving_path + vid_str + '_' + mode_str + '.avi'
             print(filename)
@@ -106,7 +106,8 @@ class Main():
 
         # Stop video and close window
         video.release()
-        out.release()
+        if export_video:
+            out.release()
         cv.destroyAllWindows()
 
     def _calcFPS(self, prev_frame_time, new_frame_time):
