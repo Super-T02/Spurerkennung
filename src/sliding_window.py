@@ -120,7 +120,6 @@ class SlidingWindow():
         # Get the drawing information
         draw_info = self._generate_line_coordinates(img_y_shape, img_x_shape)
         
-        #TODO: brauchen wir das noch??
         if not draw_info:
 
             if not self.last_draw_info:
