@@ -13,7 +13,6 @@ class HoughTransformation():
         """Constructor of the class HoughTransformation
 
         Args:
-            config_path (str): Path to the config file
             debug (bool, optional): Debug Mode on or off. Defaults to False.
         """
         self.pre = pre.Preprocess()
@@ -153,9 +152,9 @@ class HoughTransformation():
             return img
         
         if left_line and self.check_plausibility(left_line, img.shape):
-            processed_img = self._draw_poly_line_hugh(img, left_line, (255,0,0))
+            processed_img = self._draw_poly_line_hough(img, left_line, (255,0,0))
         if right_line and self.check_plausibility(right_line, img.shape):
-            processed_img = self._draw_poly_line_hugh(img, right_line)
+            processed_img = self._draw_poly_line_hough(img, right_line)
             
         return processed_img
 
@@ -421,7 +420,7 @@ class HoughTransformation():
             'PLOT_Y': plot_y,
         }    
 
-    def _draw_poly_line_hugh(self, img, draw_info, color = (0,0,255)):
+    def _draw_poly_line_hough(self, img, draw_info, color = (0,0,255)):
         """Draw the polynomial in the image
 
         Args:
