@@ -73,7 +73,7 @@ class SlidingWindow():
         self.margin = config['SLIDING_WINDOWS']['MARGIN']
         self.min_pix = config['SLIDING_WINDOWS']['MIN_PIX']
         self.thresh = config['SLIDING_WINDOWS']['THRESH']
-        self.land_width_for_search = config['SLIDING_WINDOWS']['LANE_WIDTH_FOR_SEARCH']
+        self.lane_width_for_search = config['SLIDING_WINDOWS']['LANE_WIDTH_FOR_SEARCH']
         self.scaling_of_box_width = config['SLIDING_WINDOWS']['SCALING_OF_BOX_WIDTH']
         self._min_color = config['SLIDING_WINDOWS']['MIN_COLOR']
         self._max_color = config['SLIDING_WINDOWS']['MAX_COLOR']
@@ -119,7 +119,8 @@ class SlidingWindow():
 
         # Get the drawing information
         draw_info = self._generate_line_coordinates(img_y_shape, img_x_shape)
-
+        
+        #TODO: brauchen wir das noch??
         if not draw_info:
 
             if not self.last_draw_info:
@@ -218,11 +219,11 @@ class SlidingWindow():
         mid = img.shape[1]//2
 
         if not self.last_frame_left_x:
-            # Divide the histogram into to parts
+            # Divide the histogram into two parts
             leftx_base = np.argmax(hist[:mid])
         else:
-            left_negative = self.last_frame_left_x - self.land_width_for_search
-            left_positive = self.last_frame_left_x + self.land_width_for_search
+            left_negative = self.last_frame_left_x - self.lane_width_for_search
+            left_positive = self.last_frame_left_x + self.lane_width_for_search
             if left_negative < 1:
                 left_negative = 1
                 left_positive = mid
@@ -233,8 +234,8 @@ class SlidingWindow():
             # Divide the histogram into to parts
             rightx_base = np.argmax(hist[mid:]) + mid
         else:
-            right_negative = self.last_frame_right_x - self.land_width_for_search
-            right_positive = self.last_frame_right_x + self.land_width_for_search
+            right_negative = self.last_frame_right_x - self.lane_width_for_search
+            right_positive = self.last_frame_right_x + self.lane_width_for_search
             if right_positive > img.shape[1] - 1:
                 right_negative = mid
                 right_positive = img.shape[1] - 1 
