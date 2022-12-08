@@ -138,10 +138,10 @@ class HoughTransformation():
         left_line = None
         right_line = None
         
-        if len(left_x) > 0 and len(left_y) > 0:
+        if len(left_x) > 5 and len(left_y) > 5:
             left_line = self._get_polyLine_points(img, left_x, left_y, self.left_fix, self.border_left)
 
-        if len(right_x) > 0 and len(right_y) > 0:
+        if len(right_x) > 5 and len(right_y) > 5:
             right_line = self._get_polyLine_points(img, right_x , right_y, self.right_fix, self.border_right)
         
         # Check for crossing lines
@@ -151,11 +151,21 @@ class HoughTransformation():
         if not left_line and not right_line:
             return img
         
-        if left_line and self.check_plausibility(left_line, img.shape):
+        left_ok = False
+        right_ok = False
+        if left_line:
+            left_ok = self.check_plausibility(left_line, img.shape)
+        if right_line:
+            right_ok = self.check_plausibility(right_line, img.shape)
+        
+        if not left_ok and not right_ok:
+            return img
+         
+        if left_ok:
             processed_img = self._draw_poly_line_hough(img, left_line, (255,0,0))
-        if right_line and self.check_plausibility(right_line, img.shape):
+        if right_ok:
             processed_img = self._draw_poly_line_hough(img, right_line)
-            
+        
         return processed_img
 
     def check_plausibility(self, draw_info, img_shape) -> bool:
