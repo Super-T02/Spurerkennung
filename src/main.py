@@ -22,7 +22,7 @@ class Main():
         # Define the variables
         self.path = path
         
-    def startVideo(self, mode=0, config_path="./config/video.json"):
+    def startVideo(self, mode=0, config_path="./config/video.json", export_video=False):
         if not os.path.exists(self.path):
             return print('Video not found')
         
@@ -43,6 +43,19 @@ class Main():
         video = cv.VideoCapture(self.path)
         prev_frame_time = 0
         new_frame_time = 0
+
+        # Saving Video
+        if export_video:
+            saving_path = './Documentation/Videos/'
+            mode_str = 'hough'
+            vid_str = 'default_vid'
+            if mode == 1:
+                mode_str = 'sliding_windows'
+            if self.path == './config/video_challenge.json':
+                vid_str = 'challenge_vid'
+            filename = saving_path + vid_str + '_' + mode_str + '.avi'
+            print(filename)
+            out = cv.VideoWriter(filename, cv.VideoWriter_fourcc(*'MJPG'),25, (self.WIN_X, self.WIN_Y))
 
         # While the video is running
         while(video.isOpened()):
@@ -79,8 +92,12 @@ class Main():
 
                 # Put fps on the screen
                 cv.putText(frame, fps, (7, 21), font, 1, (100, 100, 100), 2, cv.LINE_AA)
-
-                cv.imshow('Video', frame)
+                
+                if export_video:
+                    frame = cv.resize(frame, (self.WIN_X, self.WIN_Y))
+                    out.write(frame)
+                else:
+                    cv.imshow('Video', frame)
 
             # press 'Q' for exit
             if cv.waitKey(1) & 0xFF == ord('q'):
@@ -89,6 +106,7 @@ class Main():
 
         # Stop video and close window
         video.release()
+        out.release()
         cv.destroyAllWindows()
 
     def _calcFPS(self, prev_frame_time, new_frame_time):
