@@ -139,12 +139,6 @@ if __name__ == '__main__':
     # Path to video
     video = "img/Udacity/project_video.mp4"
     videoHarder = "img/Udacity/challenge_video.mp4"
-    # roi_videoHarder = [
-    #         (300, - 75),
-    #         (-40, 90),
-    #         (50, 80),
-    #         (-325, - 75),
-    # ]
     videoHardest = "img/Udacity/harder_challenge_video.mp4"
     
     # Start the program
@@ -155,6 +149,7 @@ if __name__ == '__main__':
     # Mode:
     # - 0: Hough
     # - 1: Sliding window
+    # - 2: KI-Model
     main.startVideo(mode=0, config_path="./config/video.json")
     main.startVideo(mode=1, config_path="./config/video.json")
     main.startVideo(mode=2, config_path="./config/video.json")
