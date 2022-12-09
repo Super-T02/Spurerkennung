@@ -157,13 +157,13 @@ if __name__ == '__main__':
     # Mode:
     # - 0: Hough
     # - 1: Sliding window
-    #main.startVideo(mode=0, config_path="./config/video.json")
-    #main.startVideo(mode=1, config_path="./config/video.json")
-    #main2.startVideo(mode=0, config_path="./config/video_challenge.json")
-    #main2.startVideo(mode=1, config_path="./config/video_challenge.json")
+    main.startVideo(mode=0, config_path="./config/video.json")
+    main.startVideo(mode=1, config_path="./config/video.json")
+    main2.startVideo(mode=0, config_path="./config/video_challenge.json")
+    main2.startVideo(mode=1, config_path="./config/video_challenge.json")
     # main3.startVideo(mode=1, config_path="./config/video_challenge.json")
     # main3.startVideo(mode=0, config_path="./config/video_challenge.json")
 
-    main.startVideo(mode=2, config_path="./config/video.json", export_video=True)
-    main2.startVideo(mode=2, config_path="./config/video_challenge.json", export_video=True)
+    main.startVideo(mode=2, config_path="./config/video.json")
+    main2.startVideo(mode=2, config_path="./config/video_challenge.json")
     
