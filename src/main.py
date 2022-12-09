@@ -6,16 +6,12 @@ import calib as cal
 import sliding_window as slw
 import hough_transformation as hou
 
-from model.laneDetector import LaneDetectiion
+from model.laneDetector import LaneDetection
 
 class Main():
     # Window size
     WIN_X = 1280
     WIN_Y = 720
-
-    
-
-    
 
     def __init__(self, path, debug=False):
         print('Willkommen beim Projekt "Erkennung von Spurmarkierungen"')
@@ -26,9 +22,9 @@ class Main():
         self.hough = hou.HoughTransformation(debug = debug)
 
         model_path = "src/model/tusimple_18.pth"
-        useGPU = True
+        useGPU = False # True if you want to use GPU and coda cores
         
-        self.lane_detector = LaneDetectiion(model_path, useGPU)
+        self.lane_detector = LaneDetection(model_path, useGPU)
         
         # Define the variables
         self.path = path

@@ -29,7 +29,7 @@ class ModelConfig():
 		self.griding_num = 100
 		self.cls_num_per_lane = 56
 
-class LaneDetectiion():
+class LaneDetection():
     def __init__(self, model_path, useGPU=False):
 
         self.useGPU = useGPU
