@@ -64,6 +64,8 @@ class Main():
             vid_str = 'default_vid'
             if mode == 1:
                 mode_str = 'sliding_windows'
+            if mode == 2:
+                mode_str = 'KI'
             if config_path == './config/video_challenge.json':
                 vid_str = 'challenge_vid'
             filename = saving_path + vid_str + '_' + mode_str + '.avi'
@@ -162,6 +164,6 @@ if __name__ == '__main__':
     # main3.startVideo(mode=1, config_path="./config/video_challenge.json")
     # main3.startVideo(mode=0, config_path="./config/video_challenge.json")
 
-    main.startVideo(mode=2, config_path="./config/video.json")
-    main2.startVideo(mode=2, config_path="./config/video_challenge.json")
+    main.startVideo(mode=2, config_path="./config/video.json", export_video=True)
+    main2.startVideo(mode=2, config_path="./config/video_challenge.json", export_video=True)
     
