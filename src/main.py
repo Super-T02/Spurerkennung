@@ -88,7 +88,8 @@ class Main():
                 new_frame_time = time.time()
 
                 # Calculate Frame Rate
-                fps, prev_frame_time = self._calcFPS(prev_frame_time, new_frame_time)
+                fps = self._calcFPS(prev_frame_time, new_frame_time)
+                
 
                 # Put fps on the screen
                 cv.putText(frame, fps, (7, 21), font, 1, (100, 100, 100), 2, cv.LINE_AA)
@@ -98,6 +99,8 @@ class Main():
                     out.write(frame)
                 else:
                     cv.imshow('Video', frame)
+                    
+                prev_frame_time = time.time()
 
             # press 'Q' for exit
             if cv.waitKey(1) & 0xFF == ord('q'):
@@ -113,11 +116,10 @@ class Main():
     def _calcFPS(self, prev_frame_time, new_frame_time):
         # Calculate Frame Rate
         fps = 1/(new_frame_time-prev_frame_time)
-        prev_frame_time = new_frame_time
         fps = int(fps)
         fps = str(fps)
 
-        return fps, prev_frame_time
+        return fps
 
 
 if __name__ == '__main__':
