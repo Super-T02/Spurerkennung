@@ -6,10 +6,16 @@ import calib as cal
 import sliding_window as slw
 import hough_transformation as hou
 
+from model.laneDetector import LaneDetectiion
+
 class Main():
     # Window size
     WIN_X = 1280
     WIN_Y = 720
+
+    
+
+    
 
     def __init__(self, path, debug=False):
         print('Willkommen beim Projekt "Erkennung von Spurmarkierungen"')
@@ -18,6 +24,11 @@ class Main():
         self.calib = cal.Calibration(debug=debug)
         self.sliding_win = slw.SlidingWindow(debug=debug)
         self.hough = hou.HoughTransformation(debug = debug)
+
+        model_path = "src/model/tusimple_18.pth"
+        useGPU = True
+        
+        self.lane_detector = LaneDetectiion(model_path, useGPU)
         
         # Define the variables
         self.path = path
@@ -32,6 +43,8 @@ class Main():
             error = self.hough.load_config(config_path)
         elif mode == 1:
             error = self.sliding_win.load_config(config_path)
+        elif mode == 2:
+            pass
         else:
             error = "Mode not found"
         
@@ -76,6 +89,8 @@ class Main():
                 frame = self.hough.execute(frame)
             elif mode == 1:
                 frame = self.sliding_win.execute(frame)
+            elif mode == 2:
+                frame = self.lane_detector.detectLanes(frame)
             else:
                 return print('Mode not found')
             
@@ -140,10 +155,13 @@ if __name__ == '__main__':
     # Mode:
     # - 0: Hough
     # - 1: Sliding window
-    main.startVideo(mode=0, config_path="./config/video.json")
-    main.startVideo(mode=1, config_path="./config/video.json")
-    main2.startVideo(mode=0, config_path="./config/video_challenge.json")
-    main2.startVideo(mode=1, config_path="./config/video_challenge.json")
+    #main.startVideo(mode=0, config_path="./config/video.json")
+    #main.startVideo(mode=1, config_path="./config/video.json")
+    #main2.startVideo(mode=0, config_path="./config/video_challenge.json")
+    #main2.startVideo(mode=1, config_path="./config/video_challenge.json")
     # main3.startVideo(mode=1, config_path="./config/video_challenge.json")
     # main3.startVideo(mode=0, config_path="./config/video_challenge.json")
+
+    main.startVideo(mode=2, config_path="./config/video.json")
+    main2.startVideo(mode=2, config_path="./config/video_challenge.json")
     
