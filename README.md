@@ -58,7 +58,12 @@ Die Hough-Transformation erkennt die Fahrspur nicht immer genau. Das liegt daran
 ### 2. Vorverarbeitung: Gelbe Linie auf Weiss Mappen
 
 Wendet man die normalen Ansätze oder Vorverarbeitungen (wie Canny-Edge oder Threshold) an, dann wird die Kante der gelben Linie nicht immer erkannt. Dies liegt daran, dass der Helligkeitswert von der gelben Farbe nicht so hoch ist wie die Helligkeit der weißen Spur. Wenn man den Threshold also so einstellt, dass er auch die gelbe Linie erkennt, dann werden deutlich mehr Ausreißer und ungewollte Punkte erkannt. Dies ist für beide Algorithmen nachteilhaft. Als Verbesserung wurde sich deshalb überlegt, die gelbe Line im Project und Challenge Video auf Weiss zu Mappen. Somit kann der Threshold-Wert deutlich höher gewählt werden. Als Resultat werden viel weniger Störpunkte erkannt, die Algorithmen können also besser und präziser arbeiten. Vor allem auf dem Projektvideo im Bereich des Betons ist dies gut zu erkennen. Nachteile dieser Verbesserung sind dafür eine geringere Verarbeitungsgeschwindigkeit und schlechtere Generalisierbarkeit.
-<!-- TODO: Bilder Vorher nachher (V: Tom) -->
+
+**Mit Gelb:**
+![Yellow](Documentation/Images/yellow.png)
+
+**Ohne Gelb, dafür Weiß:**
+![Without-Yellow](Documentation/Images/without_yellow.png)
 
 ### 3. Hough-Transformation: Verwenden eines Polynom 2. Grades mit Fixpunkten
 
@@ -90,7 +95,6 @@ Um zusätzliche störsignale im Fahrzeug nahen Bereich zu meiden, können die Wi
 ![Sliding-Windows Gut](Documentation/Images/Sliding_windows_really_good.png)
 
 Es ist zu sehen, dass die linke Spur deutlich länger von den Sliding Windows erkannt wird und dadurch die Krümmung präziser ist.
-
 
 ## Lessons Learned
 

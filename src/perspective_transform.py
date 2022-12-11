@@ -24,7 +24,7 @@ class Transformation():
     def transform_image_perspective(self, img, trans_matrix):
         M, M_reversed = self._calculate_matrix(img, trans_matrix)
 
-        img_transformed = cv.warpPerspective(img,M,(img.shape[1], img.shape[0]),flags=cv.INTER_LINEAR) #TODO: possibly change this flag in future versions, maybe: INTER_NEAREST
+        img_transformed = cv.warpPerspective(img,M,(img.shape[1], img.shape[0]),flags=cv.INTER_LINEAR)
 
         return img_transformed, M_reversed
 

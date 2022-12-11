@@ -1,7 +1,0 @@
-- [X] Doku schreiben (Alle)
-- [X] Vorher nacher Videos (Sliding Window dynamische Fenster größe | Sliding Window Verfolgen) (Anton)
-- [X] Videos generell erstellen (Export) (Anton)
-- [x] Neues Notebook aufpolieren & umgestallten für Prototypische Implementierung-> Doku hauptsächlich hier und gut verkaufen (Jeder für seine Themen: Anton (Perspektivtransofrmation, Sliding Window), Tom (Config, Calib, Hough), Beni (KI))
-- [x] Powerpoint (Alle, Freitag)
-- [x] Plausibilitätsprüfung für Linien (Tom / Anton)
-- [x] KI-Ansatz ?! (Beni)
