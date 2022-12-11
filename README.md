@@ -2,6 +2,8 @@
 
 Dieses Projekt beinhaltet die Prüfungsleistung für den Kurs Digitale Bildverarbeitung an der Dualen Hochschule Bade-Württemberg. Aufgabe ist es, eine Spurerkennung für ein Video zu erstellen. Bonusaufgaben können zudem ergänzt werden. Für genauere Anforderungen, siehe [Task.pdf](Task.pdf).
 
+**Hinweis: Die Videos für die Abgabe sind unter `Documentation/Videos` zu finden!**
+
 ## Ordnerstruktur
 
 ```Text
