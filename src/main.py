@@ -153,10 +153,10 @@ if __name__ == '__main__':
     # - 2: KI-Model (if model is loaded) model_path = ...
     main.startVideo(mode=0, config_path="./config/video.json")
     main.startVideo(mode=1, config_path="./config/video.json")
-    main.startVideo(mode=2, config_path="./config/video.json")
+    # main.startVideo(mode=2, config_path="./config/video.json") # Need to load model
     main2.startVideo(mode=0, config_path="./config/video_challenge.json")
     main2.startVideo(mode=1, config_path="./config/video_challenge.json")
-    main2.startVideo(mode=2, config_path="./config/video_challenge.json")
+    # main2.startVideo(mode=2, config_path="./config/video_challenge.json") # Need to load model 
     # main3.startVideo(mode=1, config_path="./config/video_challenge.json")
     # main3.startVideo(mode=0, config_path="./config/video_challenge.json")
 
