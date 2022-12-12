@@ -13,18 +13,19 @@ class Main():
     WIN_X = 1280
     WIN_Y = 720
 
-    def __init__(self, path, debug=False):
+    def __init__(self, path, model_path = "", debug=False):
         print('Willkommen beim Projekt "Erkennung von Spurmarkierungen"')
                 
         # Define the objects
         self.calib = cal.Calibration(debug=debug)
         self.sliding_win = slw.SlidingWindow(debug=debug)
         self.hough = hou.HoughTransformation(debug = debug)
-
-        model_path = "src/model/tusimple_18.pth"
+        self.model_path = None
+        
+        if model_path: self.model_path = model_path
         useGPU = False # True if you want to use GPU and coda cores
         
-        self.lane_detector = LaneDetection(model_path, useGPU)
+        if model_path: self.lane_detector = LaneDetection(model_path, useGPU)
         
         # Define the variables
         self.path = path
@@ -39,10 +40,10 @@ class Main():
             error = self.hough.load_config(config_path)
         elif mode == 1:
             error = self.sliding_win.load_config(config_path)
-        elif mode == 2:
+        elif mode == 2 and self.model_path:
             pass
         else:
-            error = "Mode not found"
+            error = "Mode not found or model not found"
         
         if error:
             print(error)
@@ -60,7 +61,7 @@ class Main():
             vid_str = 'default_vid'
             if mode == 1:
                 mode_str = 'sliding_windows'
-            if mode == 2:
+            if mode == 2 and self.model_path:
                 mode_str = 'KI'
             if config_path == './config/video_challenge.json':
                 vid_str = 'challenge_vid'
@@ -149,7 +150,7 @@ if __name__ == '__main__':
     # Mode:
     # - 0: Hough
     # - 1: Sliding window
-    # - 2: KI-Model
+    # - 2: KI-Model (if model is loaded) model_path = ...
     main.startVideo(mode=0, config_path="./config/video.json")
     main.startVideo(mode=1, config_path="./config/video.json")
     main.startVideo(mode=2, config_path="./config/video.json")

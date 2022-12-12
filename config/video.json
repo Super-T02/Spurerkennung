@@ -1,11 +1,11 @@
 {
     "HOUGH": {
         "RHO": 6,
-        "THETA": 90,
+        "THETA": 80,
         "THRESHOLD": 100,
         "MIN_LINE_LENGTH": 3,
         "MAX_LINE_GAP": 2,
-        "CANNY_LOWER": 100,
+        "CANNY_LOWER": 80,
         "CANNY_UPPER": 150,
         "LEFT_FIX": [200, 720],
         "RIGHT_FIX": [1200, 720],
@@ -16,10 +16,10 @@
         "MAX_COLOR": [70, 255, 255],
         "HIT_X_LEFT": 200,
         "HIT_Y_LEFT": 300,
-        "HIT_X_RIGHT": -80,
+        "HIT_X_RIGHT": -40,
         "HIT_Y_RIGHT": 500,
         "HIT_X_MIDDLE_LEFT": 450,
-        "HIT_X_MIDDLE_RIGHT": -380,
+        "HIT_X_MIDDLE_RIGHT": -410,
         "HIT_Y_MIDDLE": -75,
         "ROI": [
             [300, -75],
